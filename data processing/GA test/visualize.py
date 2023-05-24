@@ -37,6 +37,7 @@ def save_stat(data_route: str, file: TextIOWrapper, fig_route: str, title: str, 
     plt.savefig(fig_route, bbox_inches='tight')  # 그래프 저장
     return
 
+# basic GA
 res = open(r'20191130/data processing/basic GA/test-result.txt', 'w', encoding='utf-8')
 print(type(res))
 
@@ -56,6 +57,29 @@ save_stat(data_route=r"20191130/basic GA/res/un100test.csv",
 save_stat(data_route=r"20191130/basic GA/res/w500test.csv",
           file=res,
           fig_route=r'20191130/data processing/basic GA/images/w500test-graph.jpg',
+          title="weighted 500")
+
+res.close()
+
+# hybrid GA
+res = open(r'20191130\temp\result.txt', 'w', encoding='utf-8')
+
+# 노드 500개 테스트 결과
+save_stat(data_route=r"20191130\temp\res\un50test.csv",
+          file=res,
+          fig_route=r'20191130\temp\un50test.jpg',
+          title="unweighted 50")
+
+# 노드 500개 테스트 결과
+save_stat(data_route=r"20191130\temp\res\un100test.csv",
+          file=res,
+          fig_route=r'20191130\temp\un100test.jpg',
+          title="unweighted 100")
+
+# 노드 500개 테스트 결과
+save_stat(data_route=r"20191130\temp\res\w500test.csv",
+          file=res,
+          fig_route=r'20191130\temp\w500test.jpg',
           title="weighted 500")
 
 res.close()

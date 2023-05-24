@@ -47,6 +47,7 @@ def draw_gen_change(data_route: str, title: str, save_route: str):
     print(f"saved {title}")
     return
 
+# basic GA
 draw_gen_change(data_route=r'20191130\data processing\basic GA\un50describe.csv',
                 title=f"basic GA unweighted 50 generational change",
                 save_route=r'20191130\data processing\basic GA\images\basic-GA-un50-generational-change.jpg')
@@ -58,3 +59,16 @@ draw_gen_change(data_route=r'20191130\data processing\basic GA\un100describe.csv
 draw_gen_change(data_route=r'20191130\data processing\basic GA\w500describe.csv',
                 title=f"basic GA weighted 500 generational change",
                 save_route=r'20191130\data processing\basic GA\images\basic-GA-w500-generational-change.jpg')
+
+# hybrid GA
+draw_gen_change(data_route=r'20191130\data processing\island GA\un-100-describe-cont0.csv',
+                title='island GA unweighted 100 generational change - cont 0',
+                save_route=r'20191130\data processing\island GA\images\island-GA-un-100-gen-cont0.jpg')
+
+draw_gen_change(data_route=r'20191130\data processing\island GA\un-100-describe-cont1.csv',
+                title='island GA unweighted 100 generational change - cont 1',
+                save_route=r'20191130\data processing\island GA\images\island-GA-un-100-gen-cont1.jpg')
+
+draw_gen_change(data_route=r'20191130\data processing\island GA\un-100-describe-cont2.csv',
+                title='island GA unweighted 100 generational change - cont 2',
+                save_route=r'20191130\data processing\island GA\images\island-GA-un-100-gen-cont2.jpg')

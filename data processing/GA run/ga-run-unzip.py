@@ -1,8 +1,23 @@
 import pandas as pd
 
-def unzip_pool(where_to_save: str, data_route: str):
-    res = open(where_to_save, 'w', encoding='utf-8')
+def process_pool(data_route: str, title: str, to_save: str):
     data = pd.read_csv(data_route, header=0, index_col=0, encoding='utf-8')
+
+    data0 = data.loc[data['continent'] == 0]
+    data1 = data.loc[data['continent'] == 1]
+    data2 = data.loc[data['continent'] == 2]
+
+    data0.to_csv(to_save + f"{title}-0.csv")
+    data1.to_csv(to_save + f"{title}-1.csv")
+    data2.to_csv(to_save + f"{title}-2.csv")
+
+    return
+
+def unzip_pool(where_to_save: str, data_route: str, data_: pd.DataFrame = None):
+    res = open(where_to_save, 'w', encoding='utf-8')
+    data = data_
+    if data_route is not None:
+        data = pd.read_csv(data_route, header=0, index_col=0, encoding='utf-8')
 
     count_pool = dict()  # 압축된 pool
     total_pool = dict()  # 압축 해제 pool
@@ -41,17 +56,35 @@ def unzip_pool(where_to_save: str, data_route: str):
     res.close()
     return
 
-# 50 노드 세대별 cost 통계
-save_to = r'20191130\data processing\basic GA\un50describe.csv'
-read_from = r'20191130\data processing\basic GA\un50pool.csv'
+# # 50 노드 세대별 cost 통계
+# save_to = r'20191130\data processing\basic GA\un50describe.csv'
+# read_from = r'20191130\data processing\basic GA\un50pool.csv'
+# unzip_pool(save_to, read_from)
+
+# # 100 노드 세대별 cost 통계
+# save_to = r'20191130\data processing\basic GA\un100describe.csv'
+# read_from = r'20191130\data processing\basic GA\un100pool.csv'
+# unzip_pool(save_to, read_from)
+
+# # 500 노드 세대별 cost 통계
+# save_to = r'20191130\data processing\basic GA\w500describe.csv'
+# read_from = r'20191130\data processing\basic GA\w500pool.csv'
+# unzip_pool(save_to, read_from)
+
+# # island GA un 100 pool unzip
+# data_route = r'20191130\data processing\island GA\un100pool.csv'
+# to_save = r'20191130\data processing\island GA\\'
+# title = 'un 100 continent'
+# process_pool(data_route=data_route, title=title, to_save=to_save)
+
+save_to = r'20191130\data processing\island GA\un-100-describe-cont0.csv'
+read_from = r'20191130\data processing\island GA\un 100 continent-0.csv'
 unzip_pool(save_to, read_from)
 
-# 100 노드 세대별 cost 통계
-save_to = r'20191130\data processing\basic GA\un100describe.csv'
-read_from = r'20191130\data processing\basic GA\un100pool.csv'
+save_to = r'20191130\data processing\island GA\un-100-describe-cont1.csv'
+read_from = r'20191130\data processing\island GA\un 100 continent-1.csv'
 unzip_pool(save_to, read_from)
 
-# 500 노드 세대별 cost 통계
-save_to = r'20191130\data processing\basic GA\w500describe.csv'
-read_from = r'20191130\data processing\basic GA\w500pool.csv'
+save_to = r'20191130\data processing\island GA\un-100-describe-cont2.csv'
+read_from = r'20191130\data processing\island GA\un 100 continent-2.csv'
 unzip_pool(save_to, read_from)
