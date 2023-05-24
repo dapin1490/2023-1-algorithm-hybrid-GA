@@ -549,8 +549,9 @@ string GA::crossover(string female, int fcost, string male, int mcost) {
 	string& upper = male; // cost가 높은 부모
 	string& lower = female; // cost가 낮은 부모
 	
-	if (fcost > mcost) // 상하관계 정리
-		upper = female, lower = male;
+	if (fcost > mcost) { // 상하관계 정리
+		upper = female; lower = male;
+	}
 	
 	// 60% 확률로 cost가 더 큰 쪽의 유전자를 받음
 	for (int i = 0; i < graph.size(); i++) {
@@ -564,7 +565,7 @@ string GA::crossover(string female, int fcost, string male, int mcost) {
 
 // 돌연변이
 string GA::mutation(string chromosome) {
-	uniform_int_distribution<int> is_mutate(1, 100000); // 돌연변이 발생 확률 조절
+	uniform_int_distribution<int> is_mutate(1, 100000); // 돌연변이 발생 확률 조절: 그래프 크기에 비례해 총 발생 확률이 0.8%가 되게 조정
 	uniform_int_distribution<int> where_mutate(0, graph.size()-1); // 돌연변이 발생 자리 선택: 복원 추출
 	uniform_int_distribution<int> choose(0, 1); // 돌연변이 발생시 문자 재선택: 돌연변이가 발생해도 원본과 똑같을 수 있음
 	int cnt = graph.size() / 50 + 1; // 돌연변이 발생 횟수: 1개부터 시작해서 50개 단위로 1개씩 증가
@@ -656,6 +657,7 @@ void GA::local_opt(int deadline) {
 				ans_before = ans_after;
 				cost_before = cost_after;
 				improved = true;
+				break;
 			}
 			else {
 				ans_after = ans_before;
@@ -673,7 +675,7 @@ void GA::local_opt(int deadline) {
 }
 
 // 대륙별 진화
-void GA::evolution(int due, int contin, double cut_rate = 0.3) {
+void GA::evolution(int due, int contin, double cut_rate = 0.1) {
 	/*
 	* 부모 선택
 	* 돌연변이
@@ -849,8 +851,8 @@ tuple<int, string> GA::execute(int due) { // due: 프로그램 실행 마감시�
 
 	// 2차 진화: continent total
 	flat_pool(); // 대륙 통일
+	local_opt(due * 0.5); // 지역 최적화
 	evolution(due, 2, 0.5);
-	local_opt(due); // 지역 최적화
 	
 	// 시간 제한 확인
 	// cout << "evolution complete\n";
