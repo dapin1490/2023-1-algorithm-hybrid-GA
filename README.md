@@ -1,8 +1,8 @@
-# 2023-1-algorithm-hybrid-GA
+# maxcut-GA
 23년 1학기 알고리즘 프로젝트: 하이브리드 유전 알고리즘 구현
 
 ## ToC
-- [2023-1-algorithm-hybrid-GA](#2023-1-algorithm-hybrid-ga)
+- [maxcut-GA](#maxcut-ga)
   - [ToC](#toc)
 - [문제](#문제)
 - [basic GA 설계](#basic-ga-설계)
