@@ -584,13 +584,13 @@ string GA::mutation(string chromosome) {
 
 // 세대 교체
 bool GA::replacement(string chromosome, int cost, int contin) {
-	uniform_int_distribution<int> gen_cost(1, thresh); // 자식과 교체 대상의 cost 차이 생성
+	uniform_int_distribution<int> gen_cost(pool.begin()->first, cost - 1); // 교체 대상의 cost 범위
 	int r_cost; // 교체 대상의 cost
 	int break_count = 0; // 교체 실패 count
 	int s; // 교체 대상 해의 수
 
 	while (true) { // 교체 대상의 cost 뽑기: 유효한 cost가 나오거나 포기할 때까지 반복
-		r_cost = max(cost - gen_cost(this->gen), 0);
+		r_cost = gen_cost(this->gen);
 		if ((pool.find(r_cost) != pool.end() && pool[r_cost][contin].size() != 0) || break_count > thresh * 2)
 			break;
 		break_count++;
