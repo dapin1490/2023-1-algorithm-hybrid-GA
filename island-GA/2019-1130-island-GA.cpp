@@ -506,7 +506,7 @@ tuple<string, int, string, int> GA::selection(int contin) {
 		for (int j = 0; j < n_candis; j += 2 * i) {
 			ca = (candidates[j] > candidates[j + i] ? candidates[j] : candidates[j + i]);
 			cb = candidates[j] + candidates[j + i] - ca;
-			candidates[j] = (pick_chromo(this->gen) >= 6 ? ca : cb);
+			candidates[j] = (pick_chromo(this->gen) >= 7 ? ca : cb);
 		}
 	}
 
@@ -556,7 +556,7 @@ string GA::crossover(string female, int fcost, string male, int mcost) {
 	
 	// 60% 확률로 cost가 더 큰 쪽의 유전자를 받음
 	for (int i = 0; i < graph.size(); i++) {
-		if (dis(this->gen) <= 6)
+		if (dis(this->gen) <= 7)
 			child.push_back(upper.at(i));
 		else
 			child.push_back(lower.at(i));
@@ -638,6 +638,8 @@ void GA::local_opt(int deadline) {
 			if (pool.find(cost_after) == pool.end()) { // 추가할 자식의 cost가 pool에 없으면 추가
 				pool.emplace(cost_after, vector<vector<string>>(3));
 			}
+			pool[cost_after][0].push_back(ans_after); // 자식 추가
+			pool[cost_after][1].push_back(ans_after); // 자식 추가
 			pool[cost_after][2].push_back(ans_after); // 자식 추가
 			return;
 		}
@@ -652,6 +654,10 @@ void GA::local_opt(int deadline) {
 				ans_before = ans_after;
 				cost_before = cost_after;
 				improved = true;
+				if (pool.find(cost_after) == pool.end()) { // 추가할 자식의 cost가 pool에 없으면 추가
+					pool.emplace(cost_after, vector<vector<string>>(3));
+				}
+				pool[cost_after][2].push_back(ans_after); // 자식 추가
 				break;
 			}
 			else {
@@ -665,6 +671,8 @@ void GA::local_opt(int deadline) {
 	if (pool.find(cost_after) == pool.end()) { // 추가할 자식의 cost가 pool에 없으면 추가
 		pool.emplace(cost_after, vector<vector<string>>(3));
 	}
+	pool[cost_after][0].push_back(ans_after); // 자식 추가
+	pool[cost_after][1].push_back(ans_after); // 자식 추가
 	pool[cost_after][2].push_back(ans_after); // 자식 추가
 	return;
 }
@@ -712,7 +720,7 @@ pair<int, string> GA::local_opt(double due, int cost, string chromo) {
 }
 
 // 대륙별 진화
-void GA::evolution(int due, int contin, double cut_rate = 0.1) {
+void GA::evolution(int due, int contin, double cut_rate = 0.2) {
 	/*
 	* 부모 선택
 	* 돌연변이
@@ -727,7 +735,6 @@ void GA::evolution(int due, int contin, double cut_rate = 0.1) {
 	int* idx = &idx0; // 세대 수
 	tuple<string, int, string, int> parent; // 교배에 사용할 부모 쌍
 	pair<int, string> child; // 교배 후 생성된 자식
-	double child_opt_due = 0.1; // 자식의 지역 최적화 시간
 
 	switch (contin) {
 	case 1: idx = &idx1; break;
@@ -756,7 +763,6 @@ void GA::evolution(int due, int contin, double cut_rate = 0.1) {
 			child.second = crossover(get<0>(parent), get<1>(parent), get<2>(parent), get<3>(parent));
 			child.first = validate(child.second);
 			if (child.first != INT_MIN) {
-				child = local_opt(child_opt_due, child.first, child.second);
 				temp_pool.push_back(make_tuple(contin, child.first, child.second));
 			}
 			// thresh 예외 추가 자식
@@ -764,7 +770,6 @@ void GA::evolution(int due, int contin, double cut_rate = 0.1) {
 				child.second = crossover(get<0>(parent), get<1>(parent), get<2>(parent), get<3>(parent));
 				child.first = validate(child.second);
 				if (child.first != INT_MIN) {
-					child = local_opt(child_opt_due, child.first, child.second);
 					temp_pool.push_back(make_tuple(contin, child.first, child.second));
 				}
 			}
@@ -875,6 +880,7 @@ tuple<int, string> GA::execute(int due) { // due: 프로그램 실행 마감시�
 
 	// 1차 진화: continentA
 	evolution(due, 0);
+	local_opt(due * 0.1); // 지역 최적화
 
 	// 시간 제한 확인
 	if (is_timeout(due)) {
@@ -883,6 +889,7 @@ tuple<int, string> GA::execute(int due) { // due: 프로그램 실행 마감시�
 
 	// 1차 진화: continentB
 	evolution(due, 1);
+	local_opt(due * 0.2); // 지역 최적화
 
 	// 시간 제한 확인
 	if (is_timeout(due)) {
@@ -891,8 +898,8 @@ tuple<int, string> GA::execute(int due) { // due: 프로그램 실행 마감시�
 
 	// 2차 진화: continent total
 	flat_pool(); // 대륙 통일
-	local_opt(due * 0.5); // 지역 최적화
-	evolution(due, 2, 0.5);
+	local_opt(due * 0.3); // 지역 최적화
+	evolution(due, 2);
 	
 	// 시간 제한 확인
 	// cout << "evolution complete\n";
