@@ -158,13 +158,13 @@ int main()
 	ifstream input50{ "res/unweighted_50.txt" };
 	ofstream output50{ "res/un50test.csv" };*/
 
-	// 노드 100개 테스트
+	/*// 노드 100개 테스트
 	ifstream input100{ "res/unweighted_100.txt" };
-	ofstream output100{ "res/un100test.csv" };
+	ofstream output100{ "res/un100test.csv" };*/
 
-	/*// 노드 500개 테스트
+	// 노드 500개 테스트
 	ifstream input500{ "res/weighted_500.txt" };
-	ofstream output500{ "res/w500test.csv" };*/
+	ofstream output500{ "res/w500test.csv" };
 
 	// 프로그램 실행 시작
 	int v, e; // 정점 수 v, 간선 수 e
@@ -172,7 +172,7 @@ int main()
 	int w; // 가중치
 	Graph graph;
 	GA agent;
-	int due = 175, iter = 1; // 시간 제한(초), 반복 수
+	int due = 175, iter = 30; // 시간 제한(초), 반복 수
 
 	/*// 제출용 실행 코드
 	input >> v >> e; // 그래프 정보 입력
@@ -222,7 +222,7 @@ int main()
 	cout << "un 50: " << (double(clock_finish) - double(clock_start)) / CLOCKS_PER_SEC / 60<< "min";
 	cout << "\n누적 실행 시간 : " << clock_duration << "min\n";*/
 
-	// un 100 test
+	/*// un 100 test
 	clock_start = clock();
 
 	input100 >> v >> e; // 그래프 정보 입력
@@ -237,10 +237,10 @@ int main()
 	graph.remember();
 
 	// unweighted_100.txt 테스트
-	//cout << "\nres/unweighted_100.txt 테스트\n";
+	cout << "\nres/unweighted_100.txt test\n";
 	output100 << ",cost,solution\n";
 	for (int i = 1; i <= iter; i++) {
-		//cout << "test # " << i << "\n";
+		cout << "test # " << i << "\n";
 		agent = GA(graph);
 		tuple<int, string> sol = agent.execute(due);
 		cout << "solution cost: " << get<0>(sol) << "\n\n";
@@ -251,9 +251,9 @@ int main()
 
 	clock_duration += (double(clock_finish) - double(clock_start)) / CLOCKS_PER_SEC / 60; // 분 단위로 환산
 	//cout << "un 100: " << (double(clock_finish) - double(clock_start)) / CLOCKS_PER_SEC / 60 << "min";
-	//cout << "\n누적 실행 시간 : " << clock_duration << "min\n";
+	//cout << "\n누적 실행 시간 : " << clock_duration << "min\n";*/
 
-	/*// w 500 test
+	// w 500 test
 	clock_start = clock();
 
 	input500 >> v >> e; // 그래프 정보 입력
@@ -282,7 +282,7 @@ int main()
 	clock_finish = clock();
 
 	clock_duration += (double(clock_finish) - double(clock_start)) / CLOCKS_PER_SEC / 60; // 분 단위로 환산
-	cout << "w 500: " << (double(clock_finish) - double(clock_start)) / CLOCKS_PER_SEC / 60 << "min";*/
+	cout << "w 500: " << (double(clock_finish) - double(clock_start)) / CLOCKS_PER_SEC / 60 << "min";
 	cout << "\n프로그램 실행 시간 : " << clock_duration << "min\n";
 
 	return 0;
@@ -746,7 +746,7 @@ void GA::evolution(int due, int contin, double cut_rate = 0.3) {
 				cut_count++;
 		}
 
-		print_pool((*idx)++, contin);
+		//print_pool((*idx)++, contin);
 
 		// 시간 제한 확인
 		// cout << "children replace complete\n";
@@ -818,8 +818,8 @@ tuple<int, string> GA::execute(int due) { // due: 프로그램 실행 마감시�
 		}
 	}
 
-	print_pool(idx0++, 0);
-	print_pool(idx1++, 1);
+	/*print_pool(idx0++, 0);
+	print_pool(idx1++, 1);*/
 
 	// cout << "generate complete\n";
 	if (is_timeout(due)) {
@@ -860,7 +860,7 @@ tuple<int, string> GA::execute(int due) { // due: 프로그램 실행 마감시�
 
 	// 지역 최적화
 	local_opt(due);
-	print_pool(idx2++, 2);
+	//print_pool(idx2++, 2);
 
 	// cout << "return solution\n";
 	return get_current_best();

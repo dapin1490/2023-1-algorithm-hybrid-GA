@@ -26,9 +26,6 @@
     <Text Include="res\mini-ex-graph.txt">
       <Filter>리소스 파일</Filter>
     </Text>
-    <Text Include="res\out.txt">
-      <Filter>리소스 파일</Filter>
-    </Text>
     <Text Include="res\unweighted_50.txt">
       <Filter>리소스 파일</Filter>
     </Text>
@@ -38,13 +35,5 @@
     <Text Include="res\weighted_500.txt">
       <Filter>리소스 파일</Filter>
     </Text>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="res\un50test.csv">
-      <Filter>리소스 파일</Filter>
-    </None>
-    <None Include="maxcut.in">
-      <Filter>리소스 파일</Filter>
-    </None>
   </ItemGroup>
 </Project>
