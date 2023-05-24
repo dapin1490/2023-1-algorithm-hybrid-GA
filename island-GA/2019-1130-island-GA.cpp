@@ -484,9 +484,9 @@ tuple<string, int, string, int> GA::selection(int contin) {
 	tuple<string, int, string, int> parents; // 선택된 부모: female 먼저 선택 후 male 선택
 	int n_candis = pow(2, int(round(log(double(graph.size()) * 0.3)))); // 뽑을 후보의 수
 	uniform_int_distribution<int> pick_cost(pool.begin()->first, (--pool.end())->first); // cost 뽑기
-	uniform_int_distribution<int> pick_chromo(1, 100); // 둘 중 이긴 유전자 뽑기
+	uniform_int_distribution<int> pick_chromo(1, get<0>(get_current_best())); // 둘 중 이긴 유전자 뽑기
 	uniform_int_distribution<int> special_love(5, 1000); // cost 차이가 큰 쌍이 생성될 확률 0.5%
-	int ca, cb, len;
+	int ca, cb, len, victory_base = get<0>(sol) * 0.6;
 	vector<int> candidates; // 토너먼트에 참가할 female cost 후보
 	int break_count = 0;
 	bool break_flag = false; // 만약 female의 선택 범위에 male이 존재하지 않는다면 같은 cost 교배
@@ -506,7 +506,7 @@ tuple<string, int, string, int> GA::selection(int contin) {
 		for (int j = 0; j < n_candis - 1; j += 2 * i) {
 			ca = (candidates[j] > candidates[j + i] ? candidates[j] : candidates[j + i]);
 			cb = candidates[j] + candidates[j + i] - ca;
-			candidates[j] = (pick_chromo(this->gen) <= 65 ? ca : cb);
+			candidates[j] = (pick_chromo(this->gen) <= victory_base+(ca-cb) ? ca : cb);
 		}
 	}
 
@@ -546,17 +546,19 @@ tuple<string, int, string, int> GA::selection(int contin) {
 // 교배
 string GA::crossover(string female, int fcost, string male, int mcost) {
 	string child = ""; // 생성될 자식
-	uniform_int_distribution<int> dis(1, 100); // 난수 생성 범위 지정
+	int victory_base = (fcost + mcost) / 2;
+	uniform_int_distribution<int> dis(1, victory_base); // 난수 생성 범위 지정
 	string& upper = male; // cost가 높은 부모
 	string& lower = female; // cost가 낮은 부모
 	
 	if (fcost > mcost) { // 상하관계 정리
 		upper = female; lower = male;
 	}
+	victory_base = victory_base * 0.6 + abs(mcost - fcost);
 	
 	// 60% 확률로 cost가 더 큰 쪽의 유전자를 받음
 	for (int i = 0; i < graph.size(); i++) {
-		if (dis(this->gen) <= 65)
+		if (dis(this->gen) <= victory_base)
 			child.push_back(upper.at(i));
 		else
 			child.push_back(lower.at(i));
