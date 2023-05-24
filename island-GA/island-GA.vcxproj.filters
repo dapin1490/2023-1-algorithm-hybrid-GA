@@ -35,5 +35,11 @@
     <Text Include="res\weighted_500.txt">
       <Filter>리소스 파일</Filter>
     </Text>
+    <Text Include="res\maxcut750.txt">
+      <Filter>리소스 파일</Filter>
+    </Text>
+    <Text Include="res\maxcut1000.txt">
+      <Filter>리소스 파일</Filter>
+    </Text>
   </ItemGroup>
 </Project>

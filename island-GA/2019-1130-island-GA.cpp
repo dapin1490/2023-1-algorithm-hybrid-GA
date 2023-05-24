@@ -92,6 +92,7 @@ private:
 	bool replacement(string chromosome, int cost, int contin);
 	// 지역 최적화
 	void local_opt(int deadline);
+	pair<int, string> local_opt(double due, int cost, string chromo);
 	// 대륙별 진화
 	void evolution(int due, int contin, double cut_rate);
 
@@ -618,10 +619,8 @@ bool GA::replacement(string chromosome, int cost, int contin) {
 // 지역 최적화
 void GA::local_opt(int deadline) {
 	this->sol = get_current_best();
-	string ans_before = get<1>(sol);
-	string ans_after = get<1>(sol);
-	int cost_before = get<0>(sol);
-	int cost_after = get<0>(sol);
+	string ans_before = get<1>(sol), ans_after = get<1>(sol);
+	int cost_before = get<0>(sol), cost_after = get<0>(sol);
 	vector<int> verts(graph.size());
 	bool improved = true;
 	random_device rd;
@@ -645,12 +644,8 @@ void GA::local_opt(int deadline) {
 
 		for (int& i : verts) {
 			switch (ans_after.at(i)) {
-			case 'A':
-				ans_after.replace(i, 1, "B");
-				break;
-			case 'B':
-				ans_after.replace(i, 1, "A");
-				break;
+			case 'A': ans_after.replace(i, 1, "B"); break;
+			case 'B': ans_after.replace(i, 1, "A"); break;
 			}
 			cost_after = validate(ans_after);
 			if (cost_after >= cost_before) {
@@ -674,6 +669,48 @@ void GA::local_opt(int deadline) {
 	return;
 }
 
+pair<int, string> GA::local_opt(double due, int cost, string chromo) {
+	string ans_before = chromo, ans_after = chromo;
+	int cost_before = cost, cost_after = cost;
+	vector<int> verts(graph.size());
+	bool improved = true;
+	random_device rd;
+	default_random_engine rng(rd());
+	clock_t start_t = clock();
+
+	for (int i = 0; i < graph.size(); i++)
+		verts[i] = i;
+
+	while (improved) {
+		improved = false;
+		shuffle(verts.begin(), verts.end(), rng); // 셔플 참고: https://www.delftstack.com/ko/howto/cpp/shuffle-vector-cpp/
+
+		if ((double(clock()) - double(start_t)) / CLOCKS_PER_SEC >= due) {
+			return make_pair(cost_after, ans_after);
+		}
+
+		for (int& i : verts) {
+			switch (ans_after.at(i)) {
+			case 'A': ans_after.replace(i, 1, "B"); break;
+			case 'B': ans_after.replace(i, 1, "A"); break;
+			}
+			cost_after = validate(ans_after);
+			if (cost_after >= cost_before) {
+				ans_before = ans_after;
+				cost_before = cost_after;
+				improved = true;
+				break;
+			}
+			else {
+				ans_after = ans_before;
+				cost_after = cost_before;
+			}
+		}
+	}
+
+	return make_pair(cost_after, ans_after);
+}
+
 // 대륙별 진화
 void GA::evolution(int due, int contin, double cut_rate = 0.1) {
 	/*
@@ -688,6 +725,9 @@ void GA::evolution(int due, int contin, double cut_rate = 0.1) {
 	bool is_child_added = false; // 자식이 pool에 추가되었는지
 	int cut_count = 0; // 대체 실패한 자식 수
 	int* idx = &idx0; // 세대 수
+	tuple<string, int, string, int> parent; // 교배에 사용할 부모 쌍
+	pair<int, string> child; // 교배 후 생성된 자식
+	double child_opt_due = 0.1; // 자식의 지역 최적화 시간
 
 	switch (contin) {
 	case 1: idx = &idx1; break;
@@ -711,19 +751,21 @@ void GA::evolution(int due, int contin, double cut_rate = 0.1) {
 		// cout << "generate children\n";
 		for (int i = 0; i < k; i++) {
 			// 부모 선택
-			tuple<string, int, string, int> parent = selection(contin);
+			parent = selection(contin);
 			// 교배 및 유효성 확인
-			string child = crossover(get<0>(parent), get<1>(parent), get<2>(parent), get<3>(parent));
-			int child_cost = validate(child);
-			if (child_cost != INT_MIN) {
-				temp_pool.push_back(make_tuple(contin, child_cost, child));
+			child.second = crossover(get<0>(parent), get<1>(parent), get<2>(parent), get<3>(parent));
+			child.first = validate(child.second);
+			if (child.first != INT_MIN) {
+				child = local_opt(child_opt_due, child.first, child.second);
+				temp_pool.push_back(make_tuple(contin, child.first, child.second));
 			}
 			// thresh 예외 추가 자식
 			if (abs(get<1>(parent) - get<3>(parent)) > thresh) {
-				child = crossover(get<0>(parent), get<1>(parent), get<2>(parent), get<3>(parent));
-				child_cost = validate(child);
-				if (child_cost != INT_MIN) {
-					temp_pool.push_back(make_tuple(contin, child_cost, child));
+				child.second = crossover(get<0>(parent), get<1>(parent), get<2>(parent), get<3>(parent));
+				child.first = validate(child.second);
+				if (child.first != INT_MIN) {
+					child = local_opt(child_opt_due, child.first, child.second);
+					temp_pool.push_back(make_tuple(contin, child.first, child.second));
 				}
 			}
 		}
@@ -833,7 +875,6 @@ tuple<int, string> GA::execute(int due) { // due: 프로그램 실행 마감시�
 
 	// 1차 진화: continentA
 	evolution(due, 0);
-	//local_opt(due); // 지역 최적화
 
 	// 시간 제한 확인
 	if (is_timeout(due)) {
@@ -842,7 +883,6 @@ tuple<int, string> GA::execute(int due) { // due: 프로그램 실행 마감시�
 
 	// 1차 진화: continentB
 	evolution(due, 1);
-	//local_opt(due); // 지역 최적화
 
 	// 시간 제한 확인
 	if (is_timeout(due)) {

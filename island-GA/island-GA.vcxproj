@@ -132,6 +132,8 @@
   </ItemGroup>
   <ItemGroup>
     <Text Include="res\in.txt" />
+    <Text Include="res\maxcut1000.txt" />
+    <Text Include="res\maxcut750.txt" />
     <Text Include="res\mini-ex-graph.txt" />
     <Text Include="res\unweighted_100.txt" />
     <Text Include="res\unweighted_50.txt" />
