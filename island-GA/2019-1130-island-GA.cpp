@@ -393,9 +393,9 @@ tuple<string, int, string, int> GA::selection(int contin) {
 	tuple<string, int, string, int> parents; // 선택된 부모: female 먼저 선택 후 male 선택
 	int n_candis = pow(2, int(round(log(double(graph.size() - 1) * 0.3)))); // 뽑을 후보의 수
 	uniform_int_distribution<int> pick_cost(pool.begin()->first, (--pool.end())->first); // cost 뽑기
-	uniform_int_distribution<int> pick_chromo(1, get<0>(get_current_best())); // 둘 중 이긴 유전자 뽑기
+	uniform_int_distribution<int> pick_chromo(1, 10); // 둘 중 이긴 유전자 뽑기
 	uniform_int_distribution<int> special_love(5, 1000); // cost 차이가 큰 쌍이 생성될 확률 0.5%
-	int ca, cb, len, victory_base = get<0>(sol) * 0.6;
+	int ca, cb, len;
 	vector<int> candidates; // 토너먼트에 참가할 female cost 후보
 	int break_count = 0;
 	bool break_flag = false; // 만약 female의 선택 범위에 male이 존재하지 않는다면 같은 cost 교배
@@ -415,7 +415,7 @@ tuple<string, int, string, int> GA::selection(int contin) {
 		for (int j = 0; j < n_candis - 1; j += 2 * i) {
 			ca = (candidates[j] > candidates[j + i] ? candidates[j] : candidates[j + i]);
 			cb = candidates[j] + candidates[j + i] - ca;
-			candidates[j] = (pick_chromo(this->gen) <= victory_base ? ca : cb);
+			candidates[j] = (pick_chromo(this->gen) >= 6 ? ca : cb);
 		}
 	}
 
@@ -455,19 +455,16 @@ tuple<string, int, string, int> GA::selection(int contin) {
 // 교배
 string GA::crossover(string female, int fcost, string male, int mcost) {
 	string child = ""; // 생성될 자식
-	int victory_base = (fcost + mcost) / 2;
-	uniform_int_distribution<int> dis(1, victory_base); // 난수 생성 범위 지정
+	uniform_int_distribution<int> dis(1, 10); // 난수 생성 범위 지정
 	string& upper = male; // cost가 높은 부모
 	string& lower = female; // cost가 낮은 부모
-	
-	if (fcost > mcost) { // 상하관계 정리
-		upper = female; lower = male;
-	}
-	victory_base = victory_base * 0.6;
-	
+
+	if (fcost > mcost) // 상하관계 정리
+		upper = female, lower = male;
+
 	// 60% 확률로 cost가 더 큰 쪽의 유전자를 받음
 	for (int i = 0; i < graph.size() - 1; i++) {
-		if (dis(this->gen) <= victory_base)
+		if (dis(this->gen) <= 6)
 			child.push_back(upper.at(i));
 		else
 			child.push_back(lower.at(i));
@@ -573,26 +570,10 @@ void GA::local_opt(int deadline) {
 				memo.emplace(ans_after, cost_after);
 			}
 
-			if (cost_after > cost_before) {
+			if (cost_after >= cost_before) {
 				ans_before = ans_after;
 				cost_before = cost_after;
 				improved = true;
-			}
-			else if (cost_after == cost_before) {
-				branch_before = local_opt(0.0001, cost_before, ans_before);
-				branch_after = local_opt(0.0001, cost_after, ans_after);
-
-				if (branch_after.first > branch_before.first
-					&& branch_after.first > cost_before) {
-					ans_before = branch_after.second;
-					cost_before = branch_after.first;
-					improved = true;
-				}
-				else if (branch_before.first > cost_before) {
-					ans_before = branch_before.second;
-					cost_before = branch_before.first;
-					improved = true;
-				}
 			}
 		}
 	}
@@ -605,55 +586,6 @@ void GA::local_opt(int deadline) {
 	pool[cost_after][1].push_back(ans_after); // 자식 추가
 	pool[cost_after][2].push_back(ans_after); // 자식 추가
 	return;
-}
-
-// 지정 해 지역 최적화
-pair<int, string> GA::local_opt(double due, int cost, string chromo) {
-	string ans_before = chromo, ans_after = chromo;
-	int cost_before = cost, cost_after = cost;
-	pair<int, string> branch_before, branch_after;
-	bool improved = true;
-	random_device rd;
-	default_random_engine rng(rd());
-	clock_t start_t = clock();
-
-	if (memo.find(ans_before) == memo.end()) {
-		memo.emplace(ans_before, cost_before);
-	}
-
-	while (improved) {
-		improved = false;
-		shuffle(verts.begin(), verts.end(), rng); // 셔플 참고: https://www.delftstack.com/ko/howto/cpp/shuffle-vector-cpp/
-
-		if ((double(clock()) - double(start_t)) / CLOCKS_PER_SEC >= due) {
-			return make_pair(cost_after, ans_after);
-		}
-
-		for (int& i : verts) {
-			ans_after = ans_before;
-			cost_after = cost_before;
-			switch (ans_after.at(i)) {
-			case 'A': ans_after.replace(i, 1, "B"); break;
-			case 'B': ans_after.replace(i, 1, "A"); break;
-			}
-
-			if (memo.find(ans_after) != memo.end()) {
-				cost_after = memo[ans_after];
-			}
-			else {
-				cost_after = validate(ans_after);
-				memo.emplace(ans_after, cost_after);
-			}
-
-			if (cost_after > cost_before) {
-				ans_before = ans_after;
-				cost_before = cost_after;
-				improved = true;
-			}
-		}
-	}
-
-	return make_pair(cost_after, ans_after);
 }
 
 // 대륙별 진화
@@ -777,8 +709,8 @@ tuple<int, string> GA::execute(int due) { // due: 프로그램 실행 마감시�
 	* 대륙 외 교배
 	* 2차 수렴 후 종료
 	*/
-	int n_pool = min(500, int(this->graph.size() - 1) / 2 * 2); // 초기 생성 pool 크기: 그래프 노드 수에 비례하되 짝수로 사용
-	int k = n_pool * 0.4; // 한 세대 수
+	int n_pool = min(500, int(5 * (this->graph.size() - 1))); // 초기 생성 pool 크기
+	int k = n_pool * 0.3; // 한 세대 수
 	uniform_int_distribution<int> plz_add_me(1, 100); // 대체 대상이 없는 자식이 pool에 추가될 확률 2%
 	bool is_child_added = false; // 자식이 pool에 추가되었는지
 	int cut_count = 0; // 대체 실패한 자식 수
@@ -791,7 +723,7 @@ tuple<int, string> GA::execute(int due) { // due: 프로그램 실행 마감시�
 	// 랜덤 해 생성
 	// cout << "generate\n";
 	/*map<int, vector<vector<string>>> pool; // female[0], male[1]*/
-	for (int i = 0; i < n_pool; i++) { // 두 대륙 포함해 n_pool 만큼 생성, 개체수는 서로 같게 함(n_pool이 짝수로 생성됨)
+	for (int i = 0; i < 2 * n_pool; i++) { // 두 대륙 포함해 2 * n_pool 만큼 생성, 개체수는 서로 같게 함
 		string chromosome = generate();
 		int cost = validate(chromosome);
 		if (cost != INT_MIN) { // 유효한 해만 pool에 추가
