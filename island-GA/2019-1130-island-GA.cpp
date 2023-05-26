@@ -12,47 +12,6 @@
 #include <algorithm> // shuffle
 using namespace std;
 
-struct Edge {
-	int from; // 시작점
-	int to; // 종점
-	int w; // 가중치
-};
-
-class Graph {
-private:
-	int v; // 정점 수
-	vector<Edge> edges; // 그래프가 갖는 간선들
-	vector<vector<Edge>> remember_edges; // 각 노드마다 연결된 간선 목록 기억
-	// 전제: 그래프 초기 생성 후 수정하지 않는다.
-
-public:
-	// 생성자
-	Graph() { this->v = 0; }
-	Graph(int v) { this->v = v; }
-
-	// 함수 정의에 쓰인 const : 이 함수 안에서 쓰는 값들을 변경할 수 없다
-	// 그래프가 갖는 정점의 수를 반환
-	unsigned size() const { return v; }
-	// 그래프가 갖는 간선들을 반환
-	vector<Edge> edges_from() const { return edges; }
-	// 특정 정점에 연결된 간선들만 반환
-	vector<Edge> edges_from(unsigned i) const;
-
-	// 방향 간선 추가
-	void add(Edge&& e);
-	// 무방향 간선 추가
-	void add_undir(Edge&& e);
-
-	// 각 노드마다 연결된 간선 목록 기억
-	void remember();
-
-	// 기억한 간선 목록 가져오기
-	vector<Edge>& get_remember(int i) { return remember_edges[i]; }
-
-	// 그래프 출력
-	void print();
-};
-
 class GA {
 	/*
 	* 해결해야 할 문제
@@ -62,12 +21,14 @@ private:
 	int idx0 = 1, idx1 = 1, idx2 = 1; // 대륙별 세대 인덱스
 	mt19937 gen; // 난수 생성기
 	clock_t start_timestamp; // 프로그램 시작 시간
-	Graph graph; // 문제 그래프
+	vector<vector<pair<int, int>>> graph; // 문제 그래프
 	/* 유전자 풀: 가중치에 따른 선택을 위해 카운팅 배열 방식으로 저장 */
 	map<int, vector<vector<string>>> pool; // continentA[0], continentB[1], total[2]
 	vector<tuple<int, int, string>> temp_pool; // 임시 자식 풀: 대륙 번호[0, 1], cost, 유전자
 	int thresh; // 부모 쌍 cost 차이 제한
 	tuple<int, string> sol; // 반환할 해
+	map<string, int> memo; // 지역 최적화에서 생성된 해와 cost 기억
+	vector<int> verts; // 지역 최적화 인덱스 셔플 벡터
 
 private:
 	// thresh 설정
@@ -101,32 +62,31 @@ private:
 
 public:
 	GA() {
-		graph = Graph();
 		random_device rd;
 		mt19937 g(rd());
 		this->gen = g;
 		start_timestamp = clock();
 	}
-	GA(Graph& graph) {
+	GA(vector<vector<pair<int, int>>>& graph) {
 		this->graph = graph;
 		random_device rd;
 		mt19937 g(rd());
 		this->gen = g;
 		start_timestamp = clock();
 	}
-	GA(Graph& graph, mt19937 gen) {
+	GA(vector<vector<pair<int, int>>>& graph, mt19937 gen) {
 		this->graph = graph;
 		this->gen = gen;
 		start_timestamp = clock();
 	}
-	GA(Graph& graph, clock_t start) {
+	GA(vector<vector<pair<int, int>>>& graph, clock_t start) {
 		this->graph = graph;
 		random_device rd;
 		mt19937 g(rd());
 		this->gen = g;
 		start_timestamp = start;
 	}
-	GA(Graph& graph, mt19937 gen, clock_t start) {
+	GA(vector<vector<pair<int, int>>>& graph, mt19937 gen, clock_t start) {
 		this->graph = graph;
 		this->gen = gen;
 		start_timestamp = start;
@@ -155,59 +115,59 @@ int main()
 	ifstream input{ "maxcut.in" };
 	ofstream output{ "maxcut.out" };*/
 
-	/*// 노드 50개 테스트
+	// 노드 50개 테스트
 	ifstream input50{ "res/unweighted_50.txt" };
-	ofstream output50{ "res/un50test.csv" };*/
+	ofstream output50{ "res/un50test.csv" };
 
 	/*// 노드 100개 테스트
 	ifstream input100{ "res/unweighted_100.txt" };
 	ofstream output100{ "res/un100test.csv" };*/
 
-	// 노드 500개 테스트
+	/*// 노드 500개 테스트
 	ifstream input500{ "res/weighted_500.txt" };
-	ofstream output500{ "res/w500test.csv" };
+	ofstream output500{ "res/w500test.csv" };*/
 
 	// 프로그램 실행 시작
 	int v, e; // 정점 수 v, 간선 수 e
 	int from, to; // 출발점, 도착점
 	int w; // 가중치
-	Graph graph;
+	vector<vector<pair<int, int>>> graph;
 	GA agent;
-	int due = 175, iter = 30; // 시간 제한(초), 반복 수
+	int due = INT_MAX, iter = 1; // 시간 제한(초), 반복 수
 
 	/*// 제출용 실행 코드
 	input >> v >> e; // 그래프 정보 입력
 
-	graph = Graph(v); // 그래프 생성
+	graph.resize(v + 1, vector<pair<int, int>>()); // 그래프 생성
 
 	// 그래프 노드 입력
 	for (int i = 0; i < e; i++) {
 		input >> from >> to >> w;
-		graph.add_undir(Edge{ from, to, w });
+		graph[from].emplace_back(to, w);
+		graph[to].emplace_back(from, w);
 	}
-	graph.remember();
 
 	// 유전 알고리즘 실행 후 결과 출력
 	agent = GA(graph);
 	tuple<int, string> sol = agent.execute(due);
 	output << agent.to_string_solution() << "\n";*/
 
-	/*// un 50 test
+	// un 50 test
 	clock_start = clock();
 
 	input50 >> v >> e; // 그래프 정보 입력
 
-	graph = Graph(v); // 그래프 생성
+	graph.resize(v + 1, vector<pair<int, int>>()); // 그래프 생성
 
 	// 그래프 노드 입력
 	for (int i = 0; i < e; i++) {
 		input50 >> from >> to >> w;
-		graph.add_undir(Edge{ from, to, w });
+		graph[from].emplace_back(to, w);
+		graph[to].emplace_back(from, w);
 	}
-	graph.remember();
 
 	// unweighted_50.txt 테스트
-	cout << "\nres/unweighted_50.txt 테스트\n";
+	cout << "\nres/unweighted_50.txt 테스트 \n";
 	output50 << ",cost,solution\n";
 	for (int i = 1; i <= iter; i++) {
 		cout << "test # " << i << "\n";
@@ -220,22 +180,22 @@ int main()
 	clock_finish = clock();
 
 	clock_duration += (double(clock_finish) - double(clock_start)) / CLOCKS_PER_SEC / 60; // 분 단위로 환산
-	cout << "un 50: " << (double(clock_finish) - double(clock_start)) / CLOCKS_PER_SEC / 60<< "min";
-	cout << "\n누적 실행 시간 : " << clock_duration << "min\n";*/
+	cout << "un 50: " << (double(clock_finish) - double(clock_start)) / CLOCKS_PER_SEC / 60 << "min";
+	cout << "\n누적 실행 시간 : " << clock_duration << "min\n";
 
 	/*// un 100 test
 	clock_start = clock();
 
 	input100 >> v >> e; // 그래프 정보 입력
 
-	graph = Graph(v); // 그래프 생성
+	graph.resize(v + 1, vector<pair<int, int>>()); // 그래프 생성
 
 	// 그래프 노드 입력
 	for (int i = 0; i < e; i++) {
 		input100 >> from >> to >> w;
-		graph.add_undir(Edge{ from, to, w });
+		graph[from].emplace_back(to, w);
+		graph[to].emplace_back(from, w);
 	}
-	graph.remember();
 
 	// unweighted_100.txt 테스트
 	cout << "\nres/unweighted_100.txt test\n";
@@ -251,22 +211,22 @@ int main()
 	clock_finish = clock();
 
 	clock_duration += (double(clock_finish) - double(clock_start)) / CLOCKS_PER_SEC / 60; // 분 단위로 환산
-	//cout << "un 100: " << (double(clock_finish) - double(clock_start)) / CLOCKS_PER_SEC / 60 << "min";
-	//cout << "\n누적 실행 시간 : " << clock_duration << "min\n";*/
+	cout << "un 100: " << (double(clock_finish) - double(clock_start)) / CLOCKS_PER_SEC / 60 << "min";
+	cout << "\n누적 실행 시간 : " << clock_duration << "min\n";*/
 
-	// w 500 test
+	/*// w 500 test
 	clock_start = clock();
 
 	input500 >> v >> e; // 그래프 정보 입력
 
-	graph = Graph(v); // 그래프 생성
+	graph.resize(v + 1, vector<pair<int, int>>()); // 그래프 생성
 
 	// 그래프 노드 입력
 	for (int i = 0; i < e; i++) {
 		input500 >> from >> to >> w;
-		graph.add_undir(Edge{ from, to, w });
+		graph[from].emplace_back(to, w);
+		graph[to].emplace_back(from, w);
 	}
-	graph.remember();
 
 	// weighted_500.txt 테스트
 	cout << "\nres/unweighted_100.txt 테스트\n";
@@ -283,60 +243,10 @@ int main()
 	clock_finish = clock();
 
 	clock_duration += (double(clock_finish) - double(clock_start)) / CLOCKS_PER_SEC / 60; // 분 단위로 환산
-	cout << "w 500: " << (double(clock_finish) - double(clock_start)) / CLOCKS_PER_SEC / 60 << "min";
+	cout << "w 500: " << (double(clock_finish) - double(clock_start)) / CLOCKS_PER_SEC / 60 << "min";*/
 	cout << "\n프로그램 실행 시간 : " << clock_duration << "min\n";
 
 	return 0;
-}
-
-// 특정 정점에 연결된 간선들만 반환
-vector<Edge> Graph::edges_from(unsigned i) const {
-	vector<Edge> edge_from_i;
-	for (auto& e : edges) {
-		if (e.from == i)
-			edge_from_i.push_back(e);
-	}
-	return edge_from_i;
-}
-
-// 방향 간선 추가
-void Graph::add(Edge&& e) {
-	if (e.from > 0 && e.from <= this->v && e.to > 0 && e.to <= this->v)
-		this->edges.push_back(e);
-
-	return;
-}
-
-// 무방향 간선 추가
-void Graph::add_undir(Edge&& e) {
-	if (e.from > 0 && e.from <= this->v && e.to > 0 && e.to <= this->v) {
-		this->edges.push_back(e);
-		this->edges.push_back(Edge{e.to, e.from, e.w});
-	}
-
-	return;
-}
-
-// 각 노드마다 연결된 간선 목록 기억
-void Graph::remember() {
-	remember_edges.clear();
-	remember_edges.resize(v + 1); // 노드 번호는 1부터 시작
-	for (int i = 1; i <= v; i++) {
-		remember_edges[i] = edges_from(i);
-	}
-	return;
-}
-
-// 그래프 출력
-void Graph::print() {
-	for (int i = 1; i <= v; i++) {
-		cout << "# " << i << ": "; // 정점 번호
-		vector<Edge> edge = remember_edges[i]; // 정점에 연결된 간선 가져오기
-		for (auto& e : edge)
-			cout << "(" << e.to << ", " << e.w << ")  "; // 정점에 연결된 간선 출력
-		cout << "\n";
-	}
-	return;
 }
 
 // 제한 시간 초과 확인
@@ -408,7 +318,7 @@ int GA::validate(string chromosome) {
 	bool is_ok = false; // 두 부류 사이의 간선이 맞는지
 
 	// 해의 길이는 그래프 노드 수와 같아야 함
-	if (chromosome.length() != graph.size())
+	if (chromosome.length() != graph.size() - 1)
 		return INT_MIN;
 
 	// 두 부류 분리
@@ -433,14 +343,13 @@ int GA::validate(string chromosome) {
 		key_pool = b;
 	}
 	for (const int& node : key_pool) { // 가중치 계산 키 pool에서 노드별 반복
-		vector<Edge> edges = graph.get_remember(node); // 노드에 연결된 모든 간선 불러오기
-		for (Edge e : edges) { // 각 간선마다
-			is_ok = find(key_pool.begin(), key_pool.end(), e.to) == key_pool.end(); // 도착점이 같은 pool 내에 존재하지 않으면 OK
+		for (pair<int, int> e : graph[node]) { // 노드에 연결된 모든 간선마다
+			is_ok = find(key_pool.begin(), key_pool.end(), e.first) == key_pool.end(); // 도착점이 같은 pool 내에 존재하지 않으면 OK
 			if (flag && is_ok)
-				cost += e.w;
+				cost += e.second;
 			else if (!flag && is_ok) {
 				flag = true; // 정상 해 flag
-				cost += e.w;
+				cost += e.second;
 			}
 		}
 	}
@@ -453,7 +362,7 @@ int GA::validate(string chromosome) {
 
 // 랜덤 해 생성
 string GA::generate() {
-	int len = graph.size(); // 해의 길이
+	int len = graph.size() - 1; // 해의 길이
 	string chromosome = ""; // 생성될 해
 	uniform_int_distribution<int> dis(0, 1); // 난수 생성 범위 지정
 
@@ -482,7 +391,7 @@ tuple<string, int, string, int> GA::selection(int contin) {
 	* 뽑힌 cost에 해당하는 해 랜덤으로 뽑기 -> male parent
 	*/
 	tuple<string, int, string, int> parents; // 선택된 부모: female 먼저 선택 후 male 선택
-	int n_candis = pow(2, int(round(log(double(graph.size()) * 0.3)))); // 뽑을 후보의 수
+	int n_candis = pow(2, int(round(log(double(graph.size() - 1) * 0.3)))); // 뽑을 후보의 수
 	uniform_int_distribution<int> pick_cost(pool.begin()->first, (--pool.end())->first); // cost 뽑기
 	uniform_int_distribution<int> pick_chromo(1, get<0>(get_current_best())); // 둘 중 이긴 유전자 뽑기
 	uniform_int_distribution<int> special_love(5, 1000); // cost 차이가 큰 쌍이 생성될 확률 0.5%
@@ -557,7 +466,7 @@ string GA::crossover(string female, int fcost, string male, int mcost) {
 	victory_base = victory_base * 0.6 + abs(mcost - fcost);
 	
 	// 60% 확률로 cost가 더 큰 쪽의 유전자를 받음
-	for (int i = 0; i < graph.size(); i++) {
+	for (int i = 0; i < graph.size() - 1; i++) {
 		if (dis(this->gen) <= victory_base)
 			child.push_back(upper.at(i));
 		else
@@ -569,9 +478,9 @@ string GA::crossover(string female, int fcost, string male, int mcost) {
 // 돌연변이
 string GA::mutation(string chromosome) {
 	uniform_int_distribution<int> is_mutate(1, 100000); // 돌연변이 발생 확률 조절: 그래프 크기에 비례해 총 발생 확률이 0.8%가 되게 조정
-	uniform_int_distribution<int> where_mutate(0, graph.size()-1); // 돌연변이 발생 자리 선택: 복원 추출
+	uniform_int_distribution<int> where_mutate(0, graph.size() - 2); // 돌연변이 발생 자리 선택: 복원 추출
 	uniform_int_distribution<int> choose(0, 1); // 돌연변이 발생시 문자 재선택: 돌연변이가 발생해도 원본과 똑같을 수 있음
-	int cnt = graph.size() / 50 + 1; // 돌연변이 발생 횟수: 1개부터 시작해서 50개 단위로 1개씩 증가
+	int cnt = (graph.size() - 1) / 50 + 1; // 돌연변이 발생 횟수: 1개부터 시작해서 50개 단위로 1개씩 증가
 	int p = (1 - pow(0.992, 1 / double(cnt))) * 100000; // 개별 돌연변이 발생 확률
 
 	for (int i = 0; i < cnt; i++) {
@@ -584,18 +493,22 @@ string GA::mutation(string chromosome) {
 
 // 세대 교체
 bool GA::replacement(string chromosome, int cost, int contin) {
-	uniform_int_distribution<int> gen_cost(pool.begin()->first, cost - 1); // 교체 대상의 cost 범위
-	int r_cost; // 교체 대상의 cost
-	int break_count = 0; // 교체 실패 count
-	int s; // 교체 대상 해의 수
+	int r_cost = pool.begin()->first; // 교체 대상의 cost
+	bool fail_flag = true;
 
 	while (true) { // 교체 대상의 cost 뽑기: 유효한 cost가 나오거나 포기할 때까지 반복
-		r_cost = gen_cost(this->gen);
-		if ((pool.find(r_cost) != pool.end() && pool[r_cost][contin].size() != 0) || break_count > thresh * 2)
+		if (pool.find(r_cost) != pool.end() && pool[r_cost][contin].size() != 0) {
+			fail_flag = false;
 			break;
-		break_count++;
+		}
+		if (r_cost == cost) {
+			fail_flag = true;
+			break;
+		}
+		r_cost++;
 	}
-	if (break_count > thresh * 2) { // thresh의 2배를 뽑아도 대체할 cost가 없으면 대체하지 않고 패스
+
+	if (fail_flag) { // 대체할 cost가 없으면 대체하지 않고 패스
 		if (cost > get<0>(get_current_best())) { // 예외: 신기록 경신하면 바로 pool에 추가
 			if (pool.find(cost) == pool.end()) { // 추가할 자식의 cost가 pool에 없으면 추가
 				pool.emplace(cost, vector<vector<string>>(3));
@@ -606,10 +519,7 @@ bool GA::replacement(string chromosome, int cost, int contin) {
 		return false;
 	}
 
-	s = pool[r_cost][contin].size(); // 교체 가능 대상의 수
-
-	s = uniform_int_distribution<int>(0, s - 1)(this->gen); // 교체 대상의 인덱스 뽑기
-	pool[r_cost][contin].erase(pool[r_cost][contin].begin() + s); // 교체 대상 삭제
+	pool[r_cost][contin].pop_back(); // 교체 대상 삭제
 
 	if (pool.find(cost) == pool.end()) { // 추가할 자식의 cost가 pool에 없으면 추가
 		pool.emplace(cost, vector<vector<string>>(3));
@@ -618,18 +528,19 @@ bool GA::replacement(string chromosome, int cost, int contin) {
 	return true; // 교체 성공
 }
 
-// 지역 최적화
+// 최고 해 지역 최적화
 void GA::local_opt(int deadline) {
 	this->sol = get_current_best();
 	string ans_before = get<1>(sol), ans_after = get<1>(sol);
 	int cost_before = get<0>(sol), cost_after = get<0>(sol);
-	vector<int> verts(graph.size());
+	pair<int, string> branch_before, branch_after;
 	bool improved = true;
 	random_device rd;
 	default_random_engine rng(rd());
 
-	for (int i = 0; i < graph.size(); i++)
-		verts[i] = i;
+	if (memo.find(ans_before) == memo.end()) {
+		memo.emplace(ans_before, cost_before);
+	}
 
 	while (improved) {
 		improved = false;
@@ -651,21 +562,33 @@ void GA::local_opt(int deadline) {
 			case 'A': ans_after.replace(i, 1, "B"); break;
 			case 'B': ans_after.replace(i, 1, "A"); break;
 			}
-			cost_after = validate(ans_after);
-			if (cost_after >= cost_before) {
+
+			if (memo.find(ans_after) != memo.end()) {
+				cost_after = memo[ans_after];
+			}
+			else {
+				cost_after = validate(ans_after);
+				memo.emplace(ans_after, cost_after);
+			}
+
+			if (cost_after > cost_before) {
 				ans_before = ans_after;
 				cost_before = cost_after;
 				improved = true;
-				if (pool.find(cost_after) == pool.end()) { // 추가할 자식의 cost가 pool에 없으면 추가
-					pool.emplace(cost_after, vector<vector<string>>(3));
+			}
+			else if (cost_after == cost_before) {
+				branch_before = local_opt(0.0001, cost_before, ans_before);
+				branch_after = local_opt(0.0001, cost_after, ans_after);
+
+				if (branch_after.first > branch_before.first
+					&& branch_after.first > cost_before) {
+					ans_before = ans_after;
+					cost_before = cost_after;
+					improved = true;
 				}
-				pool[cost_after][2].push_back(ans_after); // 자식 추가
-				break;
 			}
-			else {
-				ans_after = ans_before;
-				cost_after = cost_before;
-			}
+			ans_after = ans_before;
+			cost_after = cost_before;
 		}
 	}
 
@@ -679,17 +602,19 @@ void GA::local_opt(int deadline) {
 	return;
 }
 
+// 지정 해 지역 최적화
 pair<int, string> GA::local_opt(double due, int cost, string chromo) {
 	string ans_before = chromo, ans_after = chromo;
 	int cost_before = cost, cost_after = cost;
-	vector<int> verts(graph.size());
+	pair<int, string> branch_before, branch_after;
 	bool improved = true;
 	random_device rd;
 	default_random_engine rng(rd());
 	clock_t start_t = clock();
 
-	for (int i = 0; i < graph.size(); i++)
-		verts[i] = i;
+	if (memo.find(ans_before) == memo.end()) {
+		memo.emplace(ans_before, cost_before);
+	}
 
 	while (improved) {
 		improved = false;
@@ -704,17 +629,22 @@ pair<int, string> GA::local_opt(double due, int cost, string chromo) {
 			case 'A': ans_after.replace(i, 1, "B"); break;
 			case 'B': ans_after.replace(i, 1, "A"); break;
 			}
-			cost_after = validate(ans_after);
-			if (cost_after >= cost_before) {
+
+			if (memo.find(ans_after) != memo.end()) {
+				cost_after = memo[ans_after];
+			}
+			else {
+				cost_after = validate(ans_after);
+				memo.emplace(ans_after, cost_after);
+			}
+
+			if (cost_after > cost_before) {
 				ans_before = ans_after;
 				cost_before = cost_after;
 				improved = true;
-				break;
 			}
-			else {
-				ans_after = ans_before;
-				cost_after = cost_before;
-			}
+			ans_after = ans_before;
+			cost_after = cost_before;
 		}
 	}
 
@@ -729,8 +659,7 @@ void GA::evolution(int due, int contin, double cut_rate = 0.2) {
 	* 세대 교체
 	* 수렴 후 종료
 	*/
-	int n_pool = min(500, int(5 * this->graph.size())); // 초기 생성 pool 크기
-	int k = n_pool * 0.3; // 한 세대 수
+	int k = min(500, int(this->graph.size() - 1) / 2 * 2) * 0.3; // 한 세대 수
 	uniform_int_distribution<int> plz_add_me(1, 100); // 대체 대상이 없는 자식이 pool에 추가될 확률 2%
 	bool is_child_added = false; // 자식이 pool에 추가되었는지
 	int cut_count = 0; // 대체 실패한 자식 수
@@ -844,16 +773,21 @@ tuple<int, string> GA::execute(int due) { // due: 프로그램 실행 마감시�
 	* 대륙 외 교배
 	* 2차 수렴 후 종료
 	*/
-	int n_pool = min(500, int(50 * this->graph.size())); // 초기 생성 pool 크기
+	int n_pool = min(500, int(this->graph.size() - 1) / 2 * 2); // 초기 생성 pool 크기: 그래프 노드 수에 비례하되 짝수로 사용
 	int k = n_pool * 0.3; // 한 세대 수
 	uniform_int_distribution<int> plz_add_me(1, 100); // 대체 대상이 없는 자식이 pool에 추가될 확률 2%
 	bool is_child_added = false; // 자식이 pool에 추가되었는지
 	int cut_count = 0; // 대체 실패한 자식 수
 
+	// 지역 최적화에 사용할 인덱스 셔플 벡터 초기화
+	verts.resize(graph.size() - 1);
+	for (int i = 0; i < graph.size() - 1; i++)
+		verts[i] = i;
+
 	// 랜덤 해 생성
 	// cout << "generate\n";
 	/*map<int, vector<vector<string>>> pool; // female[0], male[1]*/
-	for (int i = 0; i < 2 * n_pool; i++) { // 두 대륙 포함해 2 * n_pool 만큼 생성, 개체수는 서로 같게 함
+	for (int i = 0; i < n_pool; i++) { // 두 대륙 포함해 n_pool 만큼 생성, 개체수는 서로 같게 함(n_pool이 짝수로 생성됨)
 		string chromosome = generate();
 		int cost = validate(chromosome);
 		if (cost != INT_MIN) { // 유효한 해만 pool에 추가
