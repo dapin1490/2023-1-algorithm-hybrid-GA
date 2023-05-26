@@ -119,13 +119,13 @@ int main()
 	ifstream input50{ "res/unweighted_50.txt" };
 	ofstream output50{ "res/un50test.csv" };
 
-	/*// 노드 100개 테스트
+	// 노드 100개 테스트
 	ifstream input100{ "res/unweighted_100.txt" };
-	ofstream output100{ "res/un100test.csv" };*/
+	ofstream output100{ "res/un100test.csv" };
 
-	/*// 노드 500개 테스트
+	// 노드 500개 테스트
 	ifstream input500{ "res/weighted_500.txt" };
-	ofstream output500{ "res/w500test.csv" };*/
+	ofstream output500{ "res/w500test.csv" };
 
 	// 프로그램 실행 시작
 	int v, e; // 정점 수 v, 간선 수 e
@@ -133,7 +133,7 @@ int main()
 	int w; // 가중치
 	vector<vector<pair<int, int>>> graph;
 	GA agent;
-	int due = 175, iter = 30; // 시간 제한(초), 반복 수
+	int due = 175, iter = 50; // 시간 제한(초), 반복 수
 
 	/*// 제출용 실행 코드
 	input >> v >> e; // 그래프 정보 입력
@@ -183,7 +183,7 @@ int main()
 	cout << "un 50: " << (double(clock_finish) - double(clock_start)) / CLOCKS_PER_SEC / 60 << "min";
 	cout << "\n누적 실행 시간 : " << clock_duration << "min\n";
 
-	/*// un 100 test
+	// un 100 test
 	clock_start = clock();
 
 	input100 >> v >> e; // 그래프 정보 입력
@@ -212,9 +212,9 @@ int main()
 
 	clock_duration += (double(clock_finish) - double(clock_start)) / CLOCKS_PER_SEC / 60; // 분 단위로 환산
 	cout << "un 100: " << (double(clock_finish) - double(clock_start)) / CLOCKS_PER_SEC / 60 << "min";
-	cout << "\n누적 실행 시간 : " << clock_duration << "min\n";*/
+	cout << "\n누적 실행 시간 : " << clock_duration << "min\n";
 
-	/*// w 500 test
+	// w 500 test
 	clock_start = clock();
 
 	input500 >> v >> e; // 그래프 정보 입력
@@ -243,7 +243,7 @@ int main()
 	clock_finish = clock();
 
 	clock_duration += (double(clock_finish) - double(clock_start)) / CLOCKS_PER_SEC / 60; // 분 단위로 환산
-	cout << "w 500: " << (double(clock_finish) - double(clock_start)) / CLOCKS_PER_SEC / 60 << "min";*/
+	cout << "w 500: " << (double(clock_finish) - double(clock_start)) / CLOCKS_PER_SEC / 60 << "min";
 	cout << "\n프로그램 실행 시간 : " << clock_duration << "min\n";
 
 	return 0;
@@ -544,7 +544,7 @@ void GA::local_opt(int deadline) {
 		improved = false;
 		shuffle(verts.begin(), verts.end(), rng); // 셔플 참고: https://www.delftstack.com/ko/howto/cpp/shuffle-vector-cpp/
 
-		if (is_timeout(deadline) || stop_count >= graph.size() * 2 - 1) {
+		if (is_timeout(deadline) || stop_count >= graph.size() * graph.size()) {
 			this->sol = make_tuple(cost_after, ans_after);
 			if (pool.find(cost_after) == pool.end()) { // 추가할 자식의 cost가 pool에 없으면 추가
 				pool.emplace(cost_after, vector<vector<string>>(3));
