@@ -415,7 +415,7 @@ tuple<string, int, string, int> GA::selection(int contin) {
 		for (int j = 0; j < n_candis - 1; j += 2 * i) {
 			ca = (candidates[j] > candidates[j + i] ? candidates[j] : candidates[j + i]);
 			cb = candidates[j] + candidates[j + i] - ca;
-			candidates[j] = (pick_chromo(this->gen) <= victory_base+(ca-cb) ? ca : cb);
+			candidates[j] = (pick_chromo(this->gen) <= victory_base ? ca : cb);
 		}
 	}
 
@@ -463,7 +463,7 @@ string GA::crossover(string female, int fcost, string male, int mcost) {
 	if (fcost > mcost) { // 상하관계 정리
 		upper = female; lower = male;
 	}
-	victory_base = victory_base * 0.6 + abs(mcost - fcost);
+	victory_base = victory_base * 0.6;
 	
 	// 60% 확률로 cost가 더 큰 쪽의 유전자를 받음
 	for (int i = 0; i < graph.size() - 1; i++) {
@@ -472,7 +472,7 @@ string GA::crossover(string female, int fcost, string male, int mcost) {
 		else
 			child.push_back(lower.at(i));
 	}
-	return child;
+	return mutation(child);
 }
 
 // 돌연변이
