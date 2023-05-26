@@ -133,7 +133,7 @@ int main()
 	int w; // 가중치
 	vector<vector<pair<int, int>>> graph;
 	GA agent;
-	int due = INT_MAX, iter = 1; // 시간 제한(초), 반복 수
+	int due = 175, iter = 30; // 시간 제한(초), 반복 수
 
 	/*// 제출용 실행 코드
 	input >> v >> e; // 그래프 정보 입력
@@ -255,7 +255,7 @@ bool GA::is_timeout(int deadline, bool is_print = false) {
 	double time_len = (double(running_time) - double(start_timestamp)) / CLOCKS_PER_SEC;
 	if (is_print)
 		cout << "current time: " << time_len << "\n";
-	if (time_len > deadline) {
+	if (time_len >= deadline) {
 		if (is_print)
 			cout << "time over\n";
 		return true;
@@ -558,6 +558,8 @@ void GA::local_opt(int deadline) {
 		}
 
 		for (int& i : verts) {
+			ans_after = ans_before;
+			cost_after = cost_before;
 			switch (ans_after.at(i)) {
 			case 'A': ans_after.replace(i, 1, "B"); break;
 			case 'B': ans_after.replace(i, 1, "A"); break;
@@ -582,13 +584,16 @@ void GA::local_opt(int deadline) {
 
 				if (branch_after.first > branch_before.first
 					&& branch_after.first > cost_before) {
-					ans_before = ans_after;
-					cost_before = cost_after;
+					ans_before = branch_after.second;
+					cost_before = branch_after.first;
+					improved = true;
+				}
+				else if (branch_before.first > cost_before) {
+					ans_before = branch_before.second;
+					cost_before = branch_before.first;
 					improved = true;
 				}
 			}
-			ans_after = ans_before;
-			cost_after = cost_before;
 		}
 	}
 
@@ -625,6 +630,8 @@ pair<int, string> GA::local_opt(double due, int cost, string chromo) {
 		}
 
 		for (int& i : verts) {
+			ans_after = ans_before;
+			cost_after = cost_before;
 			switch (ans_after.at(i)) {
 			case 'A': ans_after.replace(i, 1, "B"); break;
 			case 'B': ans_after.replace(i, 1, "A"); break;
@@ -643,8 +650,6 @@ pair<int, string> GA::local_opt(double due, int cost, string chromo) {
 				cost_before = cost_after;
 				improved = true;
 			}
-			ans_after = ans_before;
-			cost_after = cost_before;
 		}
 	}
 
@@ -652,7 +657,7 @@ pair<int, string> GA::local_opt(double due, int cost, string chromo) {
 }
 
 // 대륙별 진화
-void GA::evolution(int due, int contin, double cut_rate = 0.2) {
+void GA::evolution(int due, int contin, double cut_rate = 0.3) {
 	/*
 	* 부모 선택
 	* 돌연변이
