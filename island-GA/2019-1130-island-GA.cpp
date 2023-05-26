@@ -55,7 +55,7 @@ private:
 	void local_opt(int deadline);
 	pair<int, string> local_opt(double due, int cost, string chromo);
 	// 대륙별 진화
-	void evolution(int due, int contin, double cut_rate);
+	void evolution(int due, int contin, int k, double cut_rate);
 
 	// pool에 존재하는 모든 해의 cost 출력
 	void print_pool(int idx, int contin);
@@ -493,22 +493,19 @@ string GA::mutation(string chromosome) {
 
 // 세대 교체
 bool GA::replacement(string chromosome, int cost, int contin) {
-	int r_cost = pool.begin()->first; // 교체 대상의 cost
-	bool fail_flag = true;
+	uniform_int_distribution<int> gen_cost(1, thresh); // 자식과 교체 대상의 cost 차이 생성
+	int r_cost; // 교체 대상의 cost
+	int break_count = 0; // 교체 실패 count
+	int s; // 교체 대상 해의 수
 
 	while (true) { // 교체 대상의 cost 뽑기: 유효한 cost가 나오거나 포기할 때까지 반복
-		if (pool.find(r_cost) != pool.end() && pool[r_cost][contin].size() != 0) {
-			fail_flag = false;
+		r_cost = cost - gen_cost(this->gen);
+		if ((pool.find(r_cost) != pool.end() && pool[r_cost][contin].size() != 0) || break_count > thresh * 2)
 			break;
-		}
-		if (r_cost == cost) {
-			fail_flag = true;
-			break;
-		}
-		r_cost++;
+		break_count++;
 	}
 
-	if (fail_flag) { // 대체할 cost가 없으면 대체하지 않고 패스
+	if (break_count > thresh * 2) { // 대체할 cost를 선택하지 못했으면 대체하지 않고 패스
 		if (cost > get<0>(get_current_best())) { // 예외: 신기록 경신하면 바로 pool에 추가
 			if (pool.find(cost) == pool.end()) { // 추가할 자식의 cost가 pool에 없으면 추가
 				pool.emplace(cost, vector<vector<string>>(3));
@@ -519,7 +516,10 @@ bool GA::replacement(string chromosome, int cost, int contin) {
 		return false;
 	}
 
-	pool[r_cost][contin].pop_back(); // 교체 대상 삭제
+	s = pool[r_cost][contin].size(); // 교체 가능 대상의 수
+
+	s = uniform_int_distribution<int>(0, s - 1)(this->gen); // 교체 대상의 인덱스 뽑기
+	pool[r_cost][contin].erase(pool[r_cost][contin].begin() + s); // 교체 대상 삭제
 
 	if (pool.find(cost) == pool.end()) { // 추가할 자식의 cost가 pool에 없으면 추가
 		pool.emplace(cost, vector<vector<string>>(3));
@@ -657,14 +657,13 @@ pair<int, string> GA::local_opt(double due, int cost, string chromo) {
 }
 
 // 대륙별 진화
-void GA::evolution(int due, int contin, double cut_rate = 0.3) {
+void GA::evolution(int due, int contin, int k, double cut_rate = 0.3) {
 	/*
 	* 부모 선택
 	* 돌연변이
 	* 세대 교체
 	* 수렴 후 종료
 	*/
-	int k = min(500, int(this->graph.size() - 1) / 2 * 2) * 0.3; // 한 세대 수
 	uniform_int_distribution<int> plz_add_me(1, 100); // 대체 대상이 없는 자식이 pool에 추가될 확률 2%
 	bool is_child_added = false; // 자식이 pool에 추가되었는지
 	int cut_count = 0; // 대체 실패한 자식 수
@@ -779,7 +778,7 @@ tuple<int, string> GA::execute(int due) { // due: 프로그램 실행 마감시�
 	* 2차 수렴 후 종료
 	*/
 	int n_pool = min(500, int(this->graph.size() - 1) / 2 * 2); // 초기 생성 pool 크기: 그래프 노드 수에 비례하되 짝수로 사용
-	int k = n_pool * 0.3; // 한 세대 수
+	int k = n_pool * 0.4; // 한 세대 수
 	uniform_int_distribution<int> plz_add_me(1, 100); // 대체 대상이 없는 자식이 pool에 추가될 확률 2%
 	bool is_child_added = false; // 자식이 pool에 추가되었는지
 	int cut_count = 0; // 대체 실패한 자식 수
@@ -820,7 +819,7 @@ tuple<int, string> GA::execute(int due) { // due: 프로그램 실행 마감시�
 	set_thresh(max(int(((--pool.end())->first - pool.begin()->first) * 0.1), 5));
 
 	// 1차 진화: continentA
-	evolution(due, 0);
+	evolution(due, 0, k);
 	local_opt(due * 0.1); // 지역 최적화
 
 	// 시간 제한 확인
@@ -829,7 +828,7 @@ tuple<int, string> GA::execute(int due) { // due: 프로그램 실행 마감시�
 	}
 
 	// 1차 진화: continentB
-	evolution(due, 1);
+	evolution(due, 1, k);
 	local_opt(due * 0.2); // 지역 최적화
 
 	// 시간 제한 확인
@@ -840,7 +839,7 @@ tuple<int, string> GA::execute(int due) { // due: 프로그램 실행 마감시�
 	// 2차 진화: continent total
 	flat_pool(); // 대륙 통일
 	local_opt(due * 0.3); // 지역 최적화
-	evolution(due, 2);
+	evolution(due, 2, k);
 	
 	// 시간 제한 확인
 	// cout << "evolution complete\n";
