@@ -532,6 +532,7 @@ void GA::local_opt(int deadline) {
 	int cost_before = get<0>(sol), cost_after = get<0>(sol);
 	pair<int, string> branch_before, branch_after;
 	bool improved = true;
+	int stop_count = 0;
 	random_device rd;
 	default_random_engine rng(rd());
 
@@ -543,7 +544,7 @@ void GA::local_opt(int deadline) {
 		improved = false;
 		shuffle(verts.begin(), verts.end(), rng); // 셔플 참고: https://www.delftstack.com/ko/howto/cpp/shuffle-vector-cpp/
 
-		if (is_timeout(deadline)) {
+		if (is_timeout(deadline) || stop_count >= graph.size() * 2 - 1) {
 			this->sol = make_tuple(cost_after, ans_after);
 			if (pool.find(cost_after) == pool.end()) { // 추가할 자식의 cost가 pool에 없으면 추가
 				pool.emplace(cost_after, vector<vector<string>>(3));
@@ -571,6 +572,10 @@ void GA::local_opt(int deadline) {
 			}
 
 			if (cost_after >= cost_before) {
+				if (cost_after == cost_before)
+					stop_count++;
+				else
+					stop_count = 0;
 				ans_before = ans_after;
 				cost_before = cost_after;
 				improved = true;
