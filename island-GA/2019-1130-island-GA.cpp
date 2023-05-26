@@ -138,6 +138,7 @@ int main()
 	/*// 제출용 실행 코드
 	input >> v >> e; // 그래프 정보 입력
 
+	graph.clear();
 	graph.resize(v + 1, vector<pair<int, int>>()); // 그래프 생성
 
 	// 그래프 노드 입력
@@ -157,6 +158,7 @@ int main()
 
 	input50 >> v >> e; // 그래프 정보 입력
 
+	graph.clear();
 	graph.resize(v + 1, vector<pair<int, int>>()); // 그래프 생성
 
 	// 그래프 노드 입력
@@ -188,6 +190,7 @@ int main()
 
 	input100 >> v >> e; // 그래프 정보 입력
 
+	graph.clear();
 	graph.resize(v + 1, vector<pair<int, int>>()); // 그래프 생성
 
 	// 그래프 노드 입력
@@ -219,6 +222,7 @@ int main()
 
 	input500 >> v >> e; // 그래프 정보 입력
 
+	graph.clear();
 	graph.resize(v + 1, vector<pair<int, int>>()); // 그래프 생성
 
 	// 그래프 노드 입력
