@@ -2,12 +2,13 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from matplotlib.container import BarContainer
 from io import TextIOWrapper
+from datetime import datetime
 
 # bar 그래프의 막대 위에 값 쓰기
 def bar_caption(_bar: BarContainer) -> BarContainer:
     for rect in _bar:
         height = rect.get_height()
-        plt.text(rect.get_x() + rect.get_width()/2.0, height, f'{height}', ha='center', va='bottom', size = 10)  # 'top', 'bottom', 'center', 'baseline', 'center_baseline'
+        plt.text(rect.get_x() + rect.get_width()/2.0, height, f'{height}', ha='center', va='bottom', size = 8)  # 'top', 'bottom', 'center', 'baseline', 'center_baseline'
     return _bar
 
 # 주어진 데이터를 정렬하고 바 그래프와 통계 텍스트 데이터로 저장함.
@@ -15,6 +16,7 @@ def save_stat(data_route: str, file: TextIOWrapper, fig_route: str, title: str, 
     data = pd.read_csv(data_route, header=0, index_col=0, encoding='utf-8')  # 데이터 불러오기
     data.sort_values(by='cost', inplace=True)  # 오름차순 정렬
     data.reset_index(inplace=True, drop=True)  # 인덱스 초기화
+    data.index += 1
 
     # 통계 텍스트 파일 작성
     file.write(f"{title}\n")  # 제목
@@ -38,48 +40,53 @@ def save_stat(data_route: str, file: TextIOWrapper, fig_route: str, title: str, 
     return
 
 # basic GA
-res = open(r'20191130/data processing/basic GA/test-result.txt', 'w', encoding='utf-8')
-print(type(res))
+# res = open(r'data processing\basic GA\test-result.txt', 'w', encoding='utf-8')
+# print(type(res))
 
-# 노드 50개 테스트 결과
-save_stat(data_route=r"20191130/basic GA/res/un50test.csv",
-          file=res,
-          fig_route=r'20191130/data processing/basic GA/images/un50test-graph.jpg',
-          title="unweighted 50")
+# # 노드 50개 테스트 결과
+# save_stat(data_route=r"basic GA/res/un50test.csv",
+#           file=res,
+#           fig_route=r'data processing/basic GA/images/un50test-graph.jpg',
+#           title="unweighted 50")
 
-# 노드 100개 테스트 결과
-save_stat(data_route=r"20191130/basic GA/res/un100test.csv",
-          file=res,
-          fig_route=r'20191130/data processing/basic GA/images/un100test-graph.jpg',
-          title="unweighted 100")
+# # 노드 100개 테스트 결과
+# save_stat(data_route=r"basic GA/res/un100test.csv",
+#           file=res,
+#           fig_route=r'data processing/basic GA/images/un100test-graph.jpg',
+#           title="unweighted 100")
 
-# 노드 500개 테스트 결과
-save_stat(data_route=r"20191130/basic GA/res/w500test.csv",
-          file=res,
-          fig_route=r'20191130/data processing/basic GA/images/w500test-graph.jpg',
-          title="weighted 500")
+# # 노드 500개 테스트 결과
+# save_stat(data_route=r"basic GA/res/w500test.csv",
+#           file=res,
+#           fig_route=r'data processing/basic GA/images/w500test-graph.jpg',
+#           title="weighted 500")
 
-res.close()
+# res.close()
 
 # hybrid GA
-res = open(r'20191130\temp\result.txt', 'w', encoding='utf-8')
+version_num = f"v{datetime.today().month :02d}{datetime.today().day :02d}-h{datetime.today().hour :02d}-{datetime.today().minute :02d}"
+print(version_num)
+res = open(rf'data processing\island GA\result-{version_num}.txt', 'w', encoding='utf-8')
+
+# 노드 50개 테스트 결과
+save_stat(data_route=r"island-GA\res\un50test.csv",
+          file=res,
+          fig_route=rf'data processing\island GA\images\un50test-{version_num}.jpg',
+          title="unweighted 50",
+          fgsize=(20, 8))
+
+# 노드 100개 테스트 결과
+save_stat(data_route=r"island-GA\res\un100test.csv",
+          file=res,
+          fig_route=rf'data processing\island GA\images\un100testf-{version_num}.jpg',
+          title="unweighted 100",
+          fgsize=(20, 8))
 
 # 노드 500개 테스트 결과
-save_stat(data_route=r"20191130\temp\res\un50test.csv",
+save_stat(data_route=r"island-GA\res\w500test.csv",
           file=res,
-          fig_route=r'20191130\temp\un50test.jpg',
-          title="unweighted 50")
-
-# 노드 500개 테스트 결과
-save_stat(data_route=r"20191130\temp\res\un100test.csv",
-          file=res,
-          fig_route=r'20191130\temp\un100test.jpg',
-          title="unweighted 100")
-
-# 노드 500개 테스트 결과
-save_stat(data_route=r"20191130\temp\res\w500test.csv",
-          file=res,
-          fig_route=r'20191130\temp\w500test.jpg',
-          title="weighted 500")
+          fig_route=rf'data processing\island GA\images\w500test-{version_num}.jpg',
+          title="weighted 500",
+          fgsize=(12, 10))
 
 res.close()
