@@ -51,9 +51,8 @@ private:
 	string mutation(string chromosome);
 	// 세대 교체
 	bool replacement(string chromosome, int cost, int contin);
-	// 지역 최적화
+	// 최고 해 지역 최적화
 	void local_opt(int deadline);
-	pair<int, string> local_opt(double due, int cost, string chromo);
 	// 대륙별 진화
 	void evolution(int due, int contin, int k, double cut_rate);
 
@@ -233,7 +232,7 @@ int main()
 	}
 
 	// weighted_500.txt 테스트
-	cout << "\nres/unweighted_100.txt 테스트\n";
+	cout << "\nres/weighted_500.txt 테스트\n";
 	output500 << ",cost,solution\n";
 	for (int i = 1; i <= iter; i++) {
 		cout << "test # " << i << "\n";
@@ -248,6 +247,8 @@ int main()
 
 	clock_duration += (double(clock_finish) - double(clock_start)) / CLOCKS_PER_SEC / 60; // 분 단위로 환산
 	cout << "w 500: " << (double(clock_finish) - double(clock_start)) / CLOCKS_PER_SEC / 60 << "min";
+	cout << "\n누적 실행 시간 : " << clock_duration << "min\n";
+
 	cout << "\n프로그램 실행 시간 : " << clock_duration << "min\n";
 
 	return 0;
@@ -718,7 +719,7 @@ tuple<int, string> GA::execute(int due) { // due: 프로그램 실행 마감시�
 	* 대륙 외 교배
 	* 2차 수렴 후 종료
 	*/
-	int n_pool = min(500, int(5 * (this->graph.size() - 1))); // 초기 생성 pool 크기
+	int n_pool = min(100, int(2 * (this->graph.size() - 1))); // 초기 생성 pool 크기
 	int k = n_pool * 0.3; // 한 세대 수
 	uniform_int_distribution<int> plz_add_me(1, 100); // 대체 대상이 없는 자식이 pool에 추가될 확률 2%
 	bool is_child_added = false; // 자식이 pool에 추가되었는지
