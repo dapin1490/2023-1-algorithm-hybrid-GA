@@ -45,4 +45,12 @@
       <Filter>리소스 파일</Filter>
     </Text>
   </ItemGroup>
+  <ItemGroup>
+    <None Include="maxcut.in">
+      <Filter>리소스 파일</Filter>
+    </None>
+    <None Include="maxcut.out">
+      <Filter>리소스 파일</Filter>
+    </None>
+  </ItemGroup>
 </Project>

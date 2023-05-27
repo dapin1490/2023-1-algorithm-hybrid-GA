@@ -140,6 +140,10 @@
     <Text Include="res\unweighted_50.txt" />
     <Text Include="res\weighted_500.txt" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="maxcut.in" />
+    <None Include="maxcut.out" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

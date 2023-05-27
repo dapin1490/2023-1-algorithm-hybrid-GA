@@ -110,9 +110,9 @@ int main()
 
 	clock_start = clock();
 
-	/*// 제출용 입출력
+	// 제출용 입출력
 	ifstream input{ "maxcut.in" };
-	ofstream output{ "maxcut.out" };*/
+	ofstream output{ "maxcut.out" };
 
 	// 노드 50개 테스트
 	ifstream input50{ "res/unweighted_50.txt" };
@@ -122,17 +122,17 @@ int main()
 	ifstream input100{ "res/unweighted_100.txt" };
 	ofstream output100{ "res/un100test.csv" };
 
-	/*// 노드 500개 테스트
+	// 노드 500개 테스트
 	ifstream input500{ "res/weighted_500.txt" };
-	ofstream output500{ "res/w500test.csv" };*/
+	ofstream output500{ "res/w500test.csv" };
 	
-	/*// 노드 750개 테스트
+	// 노드 750개 테스트
 	ifstream input750{ "res/maxcut750.txt" };
 	ofstream output750{ "res/un750test.csv" };
 
 	// 노드 750개 테스트
 	ifstream input1000{ "res/maxcut1000.txt" };
-	ofstream output1000{ "res/un1000test.csv" };*/
+	ofstream output1000{ "res/un1000test.csv" };
 
 	// 프로그램 실행 시작
 	int v, e; // 정점 수 v, 간선 수 e
@@ -140,9 +140,9 @@ int main()
 	int w; // 가중치
 	vector<vector<pair<int, int>>> graph;
 	GA agent;
-	int due = 170, iter = 50; // 시간 제한(초), 반복 수
+	int due = 170, iter = 35; // 시간 제한(초), 반복 수
 
-	/*// 제출용 실행 코드
+	// 제출용 실행 코드
 	input >> v >> e; // 그래프 정보 입력
 
 	graph.clear();
@@ -158,7 +158,7 @@ int main()
 	// 유전 알고리즘 실행 후 결과 출력
 	agent = GA(graph);
 	tuple<int, string> sol = agent.execute(due);
-	output << agent.to_string_solution() << "\n";*/
+	output << agent.to_string_solution() << "\n";
 
 	// un 50 test
 	clock_start = clock();
@@ -228,7 +228,7 @@ int main()
 	cout << "un 100: " << (double(clock_finish) - double(clock_start)) / CLOCKS_PER_SEC / 60 << "min";
 	cout << "\n누적 실행 시간 : " << clock_duration << "min\n";
 
-	/*// w 500 test
+	// w 500 test
 	clock_start = clock();
 
 	input500 >> v >> e; // 그래프 정보 입력
@@ -261,9 +261,9 @@ int main()
 
 	clock_duration += (double(clock_finish) - double(clock_start)) / CLOCKS_PER_SEC / 60; // 분 단위로 환산
 	cout << "w 500: " << (double(clock_finish) - double(clock_start)) / CLOCKS_PER_SEC / 60 << "min";
-	cout << "\n누적 실행 시간 : " << clock_duration << "min\n";*/
+	cout << "\n누적 실행 시간 : " << clock_duration << "min\n";
 
-	/*// un 750 test
+	// un 750 test
 	clock_start = clock();
 
 	input750 >> v >> e; // 그래프 정보 입력
@@ -329,7 +329,7 @@ int main()
 
 	clock_duration += (double(clock_finish) - double(clock_start)) / CLOCKS_PER_SEC / 60; // 분 단위로 환산
 	cout << "un 1000: " << (double(clock_finish) - double(clock_start)) / CLOCKS_PER_SEC / 60 << "min";
-	cout << "\n누적 실행 시간 : " << clock_duration << "min\n";*/
+	cout << "\n누적 실행 시간 : " << clock_duration << "min\n";
 
 	cout << "\n프로그램 실행 시간 : " << clock_duration << "min\n";
 
