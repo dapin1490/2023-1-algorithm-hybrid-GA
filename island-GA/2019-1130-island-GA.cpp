@@ -122,9 +122,17 @@ int main()
 	ifstream input100{ "res/unweighted_100.txt" };
 	ofstream output100{ "res/un100test.csv" };
 
-	// 노드 500개 테스트
+	/*// 노드 500개 테스트
 	ifstream input500{ "res/weighted_500.txt" };
-	ofstream output500{ "res/w500test.csv" };
+	ofstream output500{ "res/w500test.csv" };*/
+	
+	/*// 노드 750개 테스트
+	ifstream input750{ "res/maxcut750.txt" };
+	ofstream output750{ "res/un750test.csv" };
+
+	// 노드 750개 테스트
+	ifstream input1000{ "res/maxcut1000.txt" };
+	ofstream output1000{ "res/un1000test.csv" };*/
 
 	// 프로그램 실행 시작
 	int v, e; // 정점 수 v, 간선 수 e
@@ -132,7 +140,7 @@ int main()
 	int w; // 가중치
 	vector<vector<pair<int, int>>> graph;
 	GA agent;
-	int due = 175, iter = 50; // 시간 제한(초), 반복 수
+	int due = 170, iter = 50; // 시간 제한(초), 반복 수
 
 	/*// 제출용 실행 코드
 	input >> v >> e; // 그래프 정보 입력
@@ -171,9 +179,11 @@ int main()
 	cout << "\nres/unweighted_50.txt 테스트 \n";
 	output50 << ",cost,solution\n";
 	for (int i = 1; i <= iter; i++) {
+		double iter_start = double(clock());
 		cout << "test # " << i << "\n";
 		agent = GA(graph);
 		tuple<int, string> sol = agent.execute(due);
+		cout << "time: " << (double(clock()) - iter_start) / CLOCKS_PER_SEC << "s\n";
 		cout << "solution cost: " << get<0>(sol) << "\n\n";
 		output50 << i << "," << get<0>(sol) << "," << agent.to_string_solution() << "\n";
 	}
@@ -203,9 +213,11 @@ int main()
 	cout << "\nres/unweighted_100.txt test\n";
 	output100 << ",cost,solution\n";
 	for (int i = 1; i <= iter; i++) {
+		double iter_start = double(clock());
 		cout << "test # " << i << "\n";
 		agent = GA(graph);
 		tuple<int, string> sol = agent.execute(due);
+		cout << "time: " << (double(clock()) - iter_start) / CLOCKS_PER_SEC << "s\n";
 		cout << "solution cost: " << get<0>(sol) << "\n\n";
 		output100 << i << "," << get<0>(sol) << "," << agent.to_string_solution() << "\n";
 	}
@@ -216,7 +228,7 @@ int main()
 	cout << "un 100: " << (double(clock_finish) - double(clock_start)) / CLOCKS_PER_SEC / 60 << "min";
 	cout << "\n누적 실행 시간 : " << clock_duration << "min\n";
 
-	// w 500 test
+	/*// w 500 test
 	clock_start = clock();
 
 	input500 >> v >> e; // 그래프 정보 입력
@@ -235,9 +247,11 @@ int main()
 	cout << "\nres/weighted_500.txt 테스트\n";
 	output500 << ",cost,solution\n";
 	for (int i = 1; i <= iter; i++) {
+		double iter_start = double(clock());
 		cout << "test # " << i << "\n";
 		agent = GA(graph);
 		tuple<int, string> sol = agent.execute(due);
+		cout << "time: " << (double(clock()) - iter_start) / CLOCKS_PER_SEC / 60 << "min\n";
 		cout << "solution cost: " << get<0>(sol) << "\n\n";
 		output500 << i << "," << get<0>(sol) << "," << agent.to_string_solution() << "\n";
 	}
@@ -247,7 +261,75 @@ int main()
 
 	clock_duration += (double(clock_finish) - double(clock_start)) / CLOCKS_PER_SEC / 60; // 분 단위로 환산
 	cout << "w 500: " << (double(clock_finish) - double(clock_start)) / CLOCKS_PER_SEC / 60 << "min";
+	cout << "\n누적 실행 시간 : " << clock_duration << "min\n";*/
+
+	/*// un 750 test
+	clock_start = clock();
+
+	input750 >> v >> e; // 그래프 정보 입력
+
+	graph.clear();
+	graph.resize(v + 1, vector<pair<int, int>>()); // 그래프 생성
+
+	// 그래프 노드 입력
+	for (int i = 0; i < e; i++) {
+		input750 >> from >> to >> w;
+		graph[from].emplace_back(to, w);
+		graph[to].emplace_back(from, w);
+	}
+
+	// maxcut750.txt 테스트
+	cout << "\nres/maxcut750.txt 테스트 \n";
+	output750 << ",cost,solution\n";
+	for (int i = 1; i <= iter; i++) {
+		double iter_start = double(clock());
+		cout << "test # " << i << "\n";
+		agent = GA(graph);
+		tuple<int, string> sol = agent.execute(due);
+		cout << "time: " << (double(clock()) - iter_start) / CLOCKS_PER_SEC / 60 << "min\n";
+		cout << "solution cost: " << get<0>(sol) << "\n\n";
+		output750 << i << "," << get<0>(sol) << "," << agent.to_string_solution() << "\n";
+	}
+
+	clock_finish = clock();
+
+	clock_duration += (double(clock_finish) - double(clock_start)) / CLOCKS_PER_SEC / 60; // 분 단위로 환산
+	cout << "un 750: " << (double(clock_finish) - double(clock_start)) / CLOCKS_PER_SEC / 60 << "min";
 	cout << "\n누적 실행 시간 : " << clock_duration << "min\n";
+
+	// un 1000 test
+	clock_start = clock();
+
+	input1000 >> v >> e; // 그래프 정보 입력
+
+	graph.clear();
+	graph.resize(v + 1, vector<pair<int, int>>()); // 그래프 생성
+
+	// 그래프 노드 입력
+	for (int i = 0; i < e; i++) {
+		input1000 >> from >> to >> w;
+		graph[from].emplace_back(to, w);
+		graph[to].emplace_back(from, w);
+	}
+
+	// maxcut1000.txt 테스트
+	cout << "\nres/maxcut1000.txt 테스트 \n";
+	output1000 << ",cost,solution\n";
+	for (int i = 1; i <= iter; i++) {
+		double iter_start = double(clock());
+		cout << "test # " << i << "\n";
+		agent = GA(graph);
+		tuple<int, string> sol = agent.execute(due);
+		cout << "time: " << (double(clock()) - iter_start) / CLOCKS_PER_SEC / 60 << "min\n";
+		cout << "solution cost: " << get<0>(sol) << "\n\n";
+		output1000 << i << "," << get<0>(sol) << "," << agent.to_string_solution() << "\n";
+	}
+
+	clock_finish = clock();
+
+	clock_duration += (double(clock_finish) - double(clock_start)) / CLOCKS_PER_SEC / 60; // 분 단위로 환산
+	cout << "un 1000: " << (double(clock_finish) - double(clock_start)) / CLOCKS_PER_SEC / 60 << "min";
+	cout << "\n누적 실행 시간 : " << clock_duration << "min\n";*/
 
 	cout << "\n프로그램 실행 시간 : " << clock_duration << "min\n";
 
@@ -322,6 +404,9 @@ int GA::validate(string chromosome) {
 	bool flag = false; // 두 부류가 최소 하나 이상의 간선으로 연결되었는지
 	bool is_ok = false; // 두 부류 사이의 간선이 맞는지
 
+	if (memo.find(chromosome) != memo.end())
+		return memo[chromosome];
+
 	// 해의 길이는 그래프 노드 수와 같아야 함
 	if (chromosome.length() != graph.size() - 1)
 		return INT_MIN;
@@ -359,8 +444,11 @@ int GA::validate(string chromosome) {
 		}
 	}
 
-	if (flag)
+	if (flag) {
+		if (memo.find(chromosome) == memo.end())
+			memo.emplace(chromosome, cost);
 		return cost;
+	}
 	else // 두 부류가 서로 연결되지 않았다면 무효한 해
 		return INT_MIN;
 }
@@ -464,8 +552,10 @@ string GA::crossover(string female, int fcost, string male, int mcost) {
 	string& upper = male; // cost가 높은 부모
 	string& lower = female; // cost가 낮은 부모
 
-	if (fcost > mcost) // 상하관계 정리
-		upper = female, lower = male;
+	if (fcost > mcost) { // 상하관계 정리
+		upper = female;
+		lower = male;
+	}
 
 	// 60% 확률로 cost가 더 큰 쪽의 유전자를 받음
 	for (int i = 0; i < graph.size() - 1; i++) {
