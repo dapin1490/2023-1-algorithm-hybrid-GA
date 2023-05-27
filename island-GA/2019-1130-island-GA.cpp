@@ -110,9 +110,9 @@ int main()
 
 	clock_start = clock();
 
-	// 제출용 입출력
+	/*// 제출용 입출력
 	ifstream input{ "maxcut.in" };
-	ofstream output{ "maxcut.out" };
+	ofstream output{ "maxcut.out" };*/
 
 	// 노드 50개 테스트
 	ifstream input50{ "res/unweighted_50.txt" };
@@ -126,13 +126,13 @@ int main()
 	ifstream input500{ "res/weighted_500.txt" };
 	ofstream output500{ "res/w500test.csv" };
 	
-	// 노드 750개 테스트
+	/*// 노드 750개 테스트
 	ifstream input750{ "res/maxcut750.txt" };
 	ofstream output750{ "res/un750test.csv" };
 
-	// 노드 750개 테스트
+	// 노드 1000개 테스트
 	ifstream input1000{ "res/maxcut1000.txt" };
-	ofstream output1000{ "res/un1000test.csv" };
+	ofstream output1000{ "res/un1000test.csv" };*/
 
 	// 프로그램 실행 시작
 	int v, e; // 정점 수 v, 간선 수 e
@@ -140,9 +140,9 @@ int main()
 	int w; // 가중치
 	vector<vector<pair<int, int>>> graph;
 	GA agent;
-	int due = 170, iter = 35; // 시간 제한(초), 반복 수
+	int due = 170, iter = 50; // 시간 제한(초), 반복 수
 
-	// 제출용 실행 코드
+	/*// 제출용 실행 코드
 	input >> v >> e; // 그래프 정보 입력
 
 	graph.clear();
@@ -158,7 +158,7 @@ int main()
 	// 유전 알고리즘 실행 후 결과 출력
 	agent = GA(graph);
 	tuple<int, string> sol = agent.execute(due);
-	output << agent.to_string_solution() << "\n";
+	output << agent.to_string_solution() << "\n";*/
 
 	// un 50 test
 	clock_start = clock();
@@ -263,7 +263,7 @@ int main()
 	cout << "w 500: " << (double(clock_finish) - double(clock_start)) / CLOCKS_PER_SEC / 60 << "min";
 	cout << "\n누적 실행 시간 : " << clock_duration << "min\n";
 
-	// un 750 test
+	/*// un 750 test
 	clock_start = clock();
 
 	input750 >> v >> e; // 그래프 정보 입력
@@ -329,7 +329,7 @@ int main()
 
 	clock_duration += (double(clock_finish) - double(clock_start)) / CLOCKS_PER_SEC / 60; // 분 단위로 환산
 	cout << "un 1000: " << (double(clock_finish) - double(clock_start)) / CLOCKS_PER_SEC / 60 << "min";
-	cout << "\n누적 실행 시간 : " << clock_duration << "min\n";
+	cout << "\n누적 실행 시간 : " << clock_duration << "min\n";*/
 
 	cout << "\n프로그램 실행 시간 : " << clock_duration << "min\n";
 
@@ -639,20 +639,21 @@ void GA::local_opt(int deadline) {
 		improved = false;
 		shuffle(verts.begin(), verts.end(), rng); // 셔플 참고: https://www.delftstack.com/ko/howto/cpp/shuffle-vector-cpp/
 
-		if (is_timeout(deadline) || stop_count >= graph.size() * graph.size()) {
-			this->sol = make_tuple(cost_after, ans_after);
-			if (pool.find(cost_after) == pool.end()) { // 추가할 자식의 cost가 pool에 없으면 추가
-				pool.emplace(cost_after, vector<vector<string>>(3));
-			}
-			pool[cost_after][0].push_back(ans_after); // 자식 추가
-			pool[cost_after][1].push_back(ans_after); // 자식 추가
-			pool[cost_after][2].push_back(ans_after); // 자식 추가
-			return;
-		}
-
 		for (int& i : verts) {
+			if (is_timeout(deadline) || stop_count >= graph.size() * graph.size()) {
+				this->sol = make_tuple(cost_after, ans_after);
+				if (pool.find(cost_after) == pool.end()) { // 추가할 자식의 cost가 pool에 없으면 추가
+					pool.emplace(cost_after, vector<vector<string>>(3));
+				}
+				pool[cost_after][0].push_back(ans_after); // 자식 추가
+				pool[cost_after][1].push_back(ans_after); // 자식 추가
+				pool[cost_after][2].push_back(ans_after); // 자식 추가
+				return;
+			}
+
 			ans_after = ans_before;
 			cost_after = cost_before;
+
 			switch (ans_after.at(i)) {
 			case 'A': ans_after.replace(i, 1, "B"); break;
 			case 'B': ans_after.replace(i, 1, "A"); break;
@@ -809,7 +810,7 @@ tuple<int, string> GA::execute(int due) { // due: 프로그램 실행 마감시�
 	* 대륙 외 교배
 	* 2차 수렴 후 종료
 	*/
-	int n_pool = min(100, int(2 * (this->graph.size() - 1))); // 초기 생성 pool 크기
+	int n_pool = min(150, int(37500 / (this->graph.size() - 1))); // 초기 생성 pool 크기
 	int k = n_pool * 0.3; // 한 세대 수
 	uniform_int_distribution<int> plz_add_me(1, 100); // 대체 대상이 없는 자식이 pool에 추가될 확률 2%
 	bool is_child_added = false; // 자식이 pool에 추가되었는지
