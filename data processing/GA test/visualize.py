@@ -89,18 +89,25 @@ save_stat(data_route=r"island-GA\res\w500test.csv",
           title="weighted 500",
           fgsize=(12, 10))
 
-# 노드 750개 테스트 결과
-# save_stat(data_route=r"island-GA\res\un750test.csv",
-#           file=res,
-#           fig_route=rf'data processing\island GA\images\un750test-{version_num}.jpg',
-#           title="unweighted 750",
-#           fgsize=(12, 10))
+# G18 800개 테스트 결과
+save_stat(data_route=r"island-GA\res\G18test.csv",
+          file=res,
+          fig_route=rf'data processing\island GA\images\G18test-{version_num}.jpg',
+          title="G18 - w 800",
+          fgsize=(12, 8))
 
-# 노드 500개 테스트 결과
-# save_stat(data_route=r"island-GA\res\un1000test.csv",
-#           file=res,
-#           fig_route=rf'data processing\island GA\images\un1000test-{version_num}.jpg',
-#           title="unweighted 1000",
-#           fgsize=(12, 10))
+# G43 1000개 테스트 결과
+save_stat(data_route=r"island-GA\res\G43test.csv",
+          file=res,
+          fig_route=rf'data processing\island GA\images\G43test-{version_num}.jpg',
+          title="G43 - un 1000",
+          fgsize=(12, 8))
+
+# G53 1000개 테스트 결과
+save_stat(data_route=r"island-GA\res\G53test.csv",
+          file=res,
+          fig_route=rf'data processing\island GA\images\G53test-{version_num}.jpg',
+          title="G53 - un 1000",
+          fgsize=(12, 8))
 
 res.close()
