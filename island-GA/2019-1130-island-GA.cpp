@@ -10,6 +10,7 @@
 #include <fstream>
 #include <cmath> // pow, log
 #include <algorithm> // shuffle
+#include <queue> // 토너먼트 큐
 using namespace std;
 
 class GA {
@@ -19,6 +20,7 @@ class GA {
 	*/
 private:
 	int idx0 = 1, idx1 = 1, idx2 = 1; // 대륙별 세대 인덱스
+	int n_pool; // 초기 pool 크기
 	mt19937 gen; // 난수 생성기
 	clock_t start_timestamp; // 프로그램 시작 시간
 	vector<vector<pair<int, int>>> graph; // 문제 그래프
@@ -31,6 +33,8 @@ private:
 	vector<int> verts; // 지역 최적화 인덱스 셔플 벡터
 
 private:
+	// 초기 pool 크기 설정
+	void set_n_pool(int np) { n_pool = np; }
 	// thresh 설정
 	void set_thresh(int thr) { thresh = thr; };
 	// 시간 초과 확인
@@ -125,14 +129,18 @@ int main()
 	// 노드 500개 테스트
 	ifstream input500{ "res/weighted_500.txt" };
 	ofstream output500{ "res/w500test.csv" };
-	
-	/*// 노드 750개 테스트
-	ifstream input750{ "res/maxcut750.txt" };
-	ofstream output750{ "res/un750test.csv" };
 
-	// 노드 1000개 테스트
-	ifstream input1000{ "res/maxcut1000.txt" };
-	ofstream output1000{ "res/un1000test.csv" };*/
+	/*// G18: 800, 4694 = 992
+	ifstream inputG18{ "res/G18.txt" };
+	ofstream outputG18{ "res/G18test.csv" };
+
+	// G43: 1000 9990 = 6660
+	ifstream inputG43{ "res/G43.txt" };
+	ofstream outputG43{ "res/G43test.csv" };
+
+	// G53: 1000 5914 = 3850
+	ifstream inputG53{ "res/G53.txt" };
+	ofstream outputG53{ "res/G53test.csv" };*/
 
 	// 프로그램 실행 시작
 	int v, e; // 정점 수 v, 간선 수 e
@@ -140,7 +148,7 @@ int main()
 	int w; // 가중치
 	vector<vector<pair<int, int>>> graph;
 	GA agent;
-	int due = 170, iter = 50; // 시간 제한(초), 반복 수
+	int due = 178, iter = 40; // 시간 제한(초), 반복 수
 
 	/*// 제출용 실행 코드
 	input >> v >> e; // 그래프 정보 입력
@@ -263,72 +271,106 @@ int main()
 	cout << "w 500: " << (double(clock_finish) - double(clock_start)) / CLOCKS_PER_SEC / 60 << "min";
 	cout << "\n누적 실행 시간 : " << clock_duration << "min\n";
 
-	/*// un 750 test
+	/*// w 800 test
 	clock_start = clock();
 
-	input750 >> v >> e; // 그래프 정보 입력
+	inputG18 >> v >> e; // 그래프 정보 입력
 
 	graph.clear();
 	graph.resize(v + 1, vector<pair<int, int>>()); // 그래프 생성
 
 	// 그래프 노드 입력
 	for (int i = 0; i < e; i++) {
-		input750 >> from >> to >> w;
+		inputG18 >> from >> to >> w;
 		graph[from].emplace_back(to, w);
 		graph[to].emplace_back(from, w);
 	}
 
-	// maxcut750.txt 테스트
-	cout << "\nres/maxcut750.txt 테스트 \n";
-	output750 << ",cost,solution\n";
+	// G18.txt 테스트
+	cout << "\nres/G18.txt 테스트 \n";
+	outputG18 << ",cost,solution\n";
 	for (int i = 1; i <= iter; i++) {
 		double iter_start = double(clock());
 		cout << "test # " << i << "\n";
 		agent = GA(graph);
 		tuple<int, string> sol = agent.execute(due);
-		cout << "time: " << (double(clock()) - iter_start) / CLOCKS_PER_SEC / 60 << "min\n";
-		cout << "solution cost: " << get<0>(sol) << "\n\n";
-		output750 << i << "," << get<0>(sol) << "," << agent.to_string_solution() << "\n";
+		cout << "time: " << (double(clock()) - iter_start) / CLOCKS_PER_SEC << "s\n";
+		cout << "solution error: " << get<0>(sol) - 992 << "\n\n";
+		outputG18 << i << "," << get<0>(sol) << "," << agent.to_string_solution() << "\n";
 	}
 
 	clock_finish = clock();
 
 	clock_duration += (double(clock_finish) - double(clock_start)) / CLOCKS_PER_SEC / 60; // 분 단위로 환산
-	cout << "un 750: " << (double(clock_finish) - double(clock_start)) / CLOCKS_PER_SEC / 60 << "min";
+	cout << "G18 - w 800: " << (double(clock_finish) - double(clock_start)) / CLOCKS_PER_SEC / 60 << "min";
 	cout << "\n누적 실행 시간 : " << clock_duration << "min\n";
 
 	// un 1000 test
 	clock_start = clock();
 
-	input1000 >> v >> e; // 그래프 정보 입력
+	inputG43 >> v >> e; // 그래프 정보 입력
 
 	graph.clear();
 	graph.resize(v + 1, vector<pair<int, int>>()); // 그래프 생성
 
 	// 그래프 노드 입력
 	for (int i = 0; i < e; i++) {
-		input1000 >> from >> to >> w;
+		inputG43 >> from >> to >> w;
 		graph[from].emplace_back(to, w);
 		graph[to].emplace_back(from, w);
 	}
 
-	// maxcut1000.txt 테스트
-	cout << "\nres/maxcut1000.txt 테스트 \n";
-	output1000 << ",cost,solution\n";
+	// G43.txt 테스트
+	cout << "\nres/G43.txt 테스트 \n";
+	outputG43 << ",cost,solution\n";
 	for (int i = 1; i <= iter; i++) {
 		double iter_start = double(clock());
 		cout << "test # " << i << "\n";
 		agent = GA(graph);
 		tuple<int, string> sol = agent.execute(due);
-		cout << "time: " << (double(clock()) - iter_start) / CLOCKS_PER_SEC / 60 << "min\n";
-		cout << "solution cost: " << get<0>(sol) << "\n\n";
-		output1000 << i << "," << get<0>(sol) << "," << agent.to_string_solution() << "\n";
+		cout << "time: " << (double(clock()) - iter_start) / CLOCKS_PER_SEC << "s\n";
+		cout << "solution error: " << get<0>(sol) - 6660 << "\n\n";
+		outputG43 << i << "," << get<0>(sol) << "," << agent.to_string_solution() << "\n";
 	}
 
 	clock_finish = clock();
 
 	clock_duration += (double(clock_finish) - double(clock_start)) / CLOCKS_PER_SEC / 60; // 분 단위로 환산
-	cout << "un 1000: " << (double(clock_finish) - double(clock_start)) / CLOCKS_PER_SEC / 60 << "min";
+	cout << "G43 - un 1000: " << (double(clock_finish) - double(clock_start)) / CLOCKS_PER_SEC / 60 << "min";
+	cout << "\n누적 실행 시간 : " << clock_duration << "min\n";
+
+	// un 1000 test
+	clock_start = clock();
+
+	inputG53 >> v >> e; // 그래프 정보 입력
+
+	graph.clear();
+	graph.resize(v + 1, vector<pair<int, int>>()); // 그래프 생성
+
+	// 그래프 노드 입력
+	for (int i = 0; i < e; i++) {
+		inputG53 >> from >> to >> w;
+		graph[from].emplace_back(to, w);
+		graph[to].emplace_back(from, w);
+	}
+
+	// G53.txt 테스트
+	cout << "\nres/G53.txt 테스트 \n";
+	outputG53 << ",cost,solution\n";
+	for (int i = 1; i <= iter; i++) {
+		double iter_start = double(clock());
+		cout << "test # " << i << "\n";
+		agent = GA(graph);
+		tuple<int, string> sol = agent.execute(due);
+		cout << "time: " << (double(clock()) - iter_start) / CLOCKS_PER_SEC << "s\n";
+		cout << "solution error: " << get<0>(sol) - 3850 << "\n\n";
+		outputG53 << i << "," << get<0>(sol) << "," << agent.to_string_solution() << "\n";
+	}
+
+	clock_finish = clock();
+
+	clock_duration += (double(clock_finish) - double(clock_start)) / CLOCKS_PER_SEC / 60; // 분 단위로 환산
+	cout << "G53 - un 1000: " << (double(clock_finish) - double(clock_start)) / CLOCKS_PER_SEC / 60 << "min";
 	cout << "\n누적 실행 시간 : " << clock_duration << "min\n";*/
 
 	cout << "\n프로그램 실행 시간 : " << clock_duration << "min\n";
@@ -484,41 +526,44 @@ tuple<string, int, string, int> GA::selection(int contin) {
 	* 뽑힌 cost에 해당하는 해 랜덤으로 뽑기 -> male parent
 	*/
 	tuple<string, int, string, int> parents; // 선택된 부모: female 먼저 선택 후 male 선택
-	int n_candis = pow(2, int(round(log(double(graph.size() - 1) * 0.3)))); // 뽑을 후보의 수
+	int n_candis = n_pool * 0.3; // 뽑을 후보의 수
 	uniform_int_distribution<int> pick_cost(pool.begin()->first, (--pool.end())->first); // cost 뽑기
 	uniform_int_distribution<int> pick_chromo(1, 10); // 둘 중 이긴 유전자 뽑기
 	uniform_int_distribution<int> special_love(5, 1000); // cost 차이가 큰 쌍이 생성될 확률 0.5%
-	int ca, cb, len;
-	vector<int> candidates; // 토너먼트에 참가할 female cost 후보
-	int break_count = 0;
+	int ca, cb, len; // 토너먼트 참가자 a, b. 최종 승자 cost를 갖는 해의 수.
+	int winner; // 토너먼트 승자 cost
+	queue<int> candidates; // 토너먼트에 참가할 female cost 후보
+	int break_count = 0; // male 뽑기 실패 카운트
 	bool break_flag = false; // 만약 female의 선택 범위에 male이 존재하지 않는다면 같은 cost 교배
 
-	// female 후보 뽑기: 2^(N*0.3)에 가장 가까운 2의 거듭제곱만큼, 중복은 고려하지 않음
+	// female 후보 뽑기: 중복은 고려하지 않음
 	for (int i = 0; i < n_candis; i++) {
 		while (true) { // 유효한 후보가 나올 때까지 뽑기
 			ca = pick_cost(this->gen); // cost 선택: 존재하는 모든 cost 중 뽑기 때문에 무조건 하나는 있음
 			if (pool.find(ca) != pool.end() && pool[ca][contin].size() != 0) // 선택한 cost를 갖는 해가 있는지 확인
 				break;
 		}
-		candidates.push_back(ca); // 후보 추가
+		candidates.push(ca); // 후보 추가
 	}
 
 	// 뽑힌 cost로 토너먼트: 승자를 왼쪽에 저장, 최종 승자는 0번에 저장됨
-	for (int i = 1; i < n_candis; i *= 2) {
-		for (int j = 0; j < n_candis - 1; j += 2 * i) {
-			ca = (candidates[j] > candidates[j + i] ? candidates[j] : candidates[j + i]);
-			cb = candidates[j] + candidates[j + i] - ca;
-			candidates[j] = (pick_chromo(this->gen) >= 6 ? ca : cb);
-		}
+	while (candidates.size() >= 2) {
+		ca = candidates.front();
+		candidates.pop();
+		cb = candidates.front();
+		candidates.pop();
+
+		winner = (pick_chromo(this->gen) >= 6 ? ca : cb);
+		candidates.push(winner);
 	}
 
 	// 최종 승자 cost를 갖는 해 중에서 랜덤하게 female 선택
-	len = pool[candidates[0]][contin].size(); // 후보 수: 최소 하나 이상 있는 것만 후보로 넣었기 때문에 무조건 있음
-	get<0>(parents) = pool[candidates[0]][contin][uniform_int_distribution<int>(0, len - 1)(this->gen)]; // 뽑기
-	get<1>(parents) = candidates[0]; // 뽑힌 female의 가중치
+	len = pool[winner][contin].size(); // 후보 수: 최소 하나 이상 있는 것만 후보로 넣었기 때문에 무조건 있음
+	get<0>(parents) = pool[winner][contin][uniform_int_distribution<int>(0, len - 1)(this->gen)]; // 뽑기
+	get<1>(parents) = winner; // 뽑힌 female의 가중치
 
 	if (special_love(this->gen) > 5) { // 예외 교배 발생 판정: 발생하지 않으면 female의 cost보다 나은 male만을 선택하게 함
-		pick_cost = uniform_int_distribution<int>(candidates[0] + 1, candidates[0] + thresh);
+		pick_cost = uniform_int_distribution<int>(winner + 1, winner + thresh);
 	}
 
 	// male 선택
@@ -538,8 +583,8 @@ tuple<string, int, string, int> GA::selection(int contin) {
 		get<3>(parents) = cb;
 	}
 	else { // male이 없어서 같은 cost 교배
-		get<2>(parents) = pool[candidates[0]][contin][uniform_int_distribution<int>(0, len - 1)(this->gen)]; // 뽑기
-		get<3>(parents) = candidates[0]; // 뽑힌 female의 가중치
+		get<2>(parents) = pool[winner][contin][uniform_int_distribution<int>(0, len - 1)(this->gen)]; // 뽑기
+		get<3>(parents) = winner; // 뽑힌 female의 가중치
 	}
 
 	return parents;
@@ -608,10 +653,7 @@ bool GA::replacement(string chromosome, int cost, int contin) {
 		return false;
 	}
 
-	s = pool[r_cost][contin].size(); // 교체 가능 대상의 수
-
-	s = uniform_int_distribution<int>(0, s - 1)(this->gen); // 교체 대상의 인덱스 뽑기
-	pool[r_cost][contin].erase(pool[r_cost][contin].begin() + s); // 교체 대상 삭제
+	pool[r_cost][contin].pop_back(); // 교체 대상 삭제
 
 	if (pool.find(cost) == pool.end()) { // 추가할 자식의 cost가 pool에 없으면 추가
 		pool.emplace(cost, vector<vector<string>>(3));
@@ -625,11 +667,9 @@ void GA::local_opt(int deadline) {
 	this->sol = get_current_best();
 	string ans_before = get<1>(sol), ans_after = get<1>(sol);
 	int cost_before = get<0>(sol), cost_after = get<0>(sol);
-	pair<int, string> branch_before, branch_after;
 	bool improved = true;
 	int stop_count = 0;
-	random_device rd;
-	default_random_engine rng(rd());
+	default_random_engine rng(random_device{}());
 
 	if (memo.find(ans_before) == memo.end()) {
 		memo.emplace(ans_before, cost_before);
@@ -640,6 +680,9 @@ void GA::local_opt(int deadline) {
 		shuffle(verts.begin(), verts.end(), rng); // 셔플 참고: https://www.delftstack.com/ko/howto/cpp/shuffle-vector-cpp/
 
 		for (int& i : verts) {
+			ans_after = ans_before;
+			cost_after = cost_before;
+
 			if (is_timeout(deadline) || stop_count >= graph.size() * graph.size()) {
 				this->sol = make_tuple(cost_after, ans_after);
 				if (pool.find(cost_after) == pool.end()) { // 추가할 자식의 cost가 pool에 없으면 추가
@@ -650,9 +693,6 @@ void GA::local_opt(int deadline) {
 				pool[cost_after][2].push_back(ans_after); // 자식 추가
 				return;
 			}
-
-			ans_after = ans_before;
-			cost_after = cost_before;
 
 			switch (ans_after.at(i)) {
 			case 'A': ans_after.replace(i, 1, "B"); break;
@@ -810,7 +850,7 @@ tuple<int, string> GA::execute(int due) { // due: 프로그램 실행 마감시�
 	* 대륙 외 교배
 	* 2차 수렴 후 종료
 	*/
-	int n_pool = min(150, int(37500 / (this->graph.size() - 1))); // 초기 생성 pool 크기
+	set_n_pool(min(150, int(37500 / (this->graph.size() - 1)))); // 초기 생성 pool 크기
 	int k = n_pool * 0.3; // 한 세대 수
 	uniform_int_distribution<int> plz_add_me(1, 100); // 대체 대상이 없는 자식이 pool에 추가될 확률 2%
 	bool is_child_added = false; // 자식이 pool에 추가되었는지
@@ -873,7 +913,7 @@ tuple<int, string> GA::execute(int due) { // due: 프로그램 실행 마감시�
 	flat_pool(); // 대륙 통일
 	local_opt(due * 0.3); // 지역 최적화
 	evolution(due, 2, k);
-	
+
 	// 시간 제한 확인
 	// cout << "evolution complete\n";
 	if (is_timeout(due)) {
