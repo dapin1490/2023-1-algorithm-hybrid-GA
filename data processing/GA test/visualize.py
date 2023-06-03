@@ -128,11 +128,11 @@ res.write("""
 
 if (cost_after == cost_before) {
     stop_count++;
-    temper += abs(cost_after - cost_before) * 0.21;
+    temper += abs(cost_after - cost_before) * 0.19;
 }
 else {
     stop_count = 0;
-    temper += abs(cost_after - cost_before) * 0.41;
+    temper += abs(cost_after - cost_before) * 0.38;
 }
 """)
 
