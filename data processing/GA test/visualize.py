@@ -3,6 +3,7 @@ import matplotlib.pyplot as plt
 from matplotlib.container import BarContainer
 from io import TextIOWrapper
 from datetime import datetime
+from math import ceil, floor
 
 # bar 그래프의 막대 위에 값 쓰기
 def bar_caption(_bar: BarContainer) -> BarContainer:
@@ -33,7 +34,7 @@ def save_stat(data_route: str, file: TextIOWrapper, fig_route: str, title: str, 
     plt.legend([f'mean: {data["cost"].mean():.2f}'], loc='upper left')  # 그래프 왼쪽 위에 범례
 
     plt.title(f"{title}(std: {data['cost'].std():.2f})")  # 그래프 제목에 괄호 치고 분산 표기
-    plt.ylim(data['cost'].min() // 10 * 10 - 10, data['cost'].max() // 10 * 10 + 10)  # y 값 범위 제한
+    plt.ylim(floor(data['cost'].min() * 0.1) * 10, ceil(data['cost'].max() * 0.1) * 10)  # y 값 범위 제한
     plt.yticks(rotation=0)
 
     plt.savefig(fig_route, bbox_inches='tight')  # 그래프 저장
@@ -98,24 +99,36 @@ save_stat(data_route=r"island-GA\res\wc297test.csv",
           fgsize=(12, 10))
 
 # G18 800개 테스트 결과
-save_stat(data_route=r"island-GA\res\G18test.csv",
-          file=res,
-          fig_route=rf'data processing\island GA\images\G18test-{version_num}.jpg',
-          title="G18 - w 800",
-          fgsize=(12, 8))
+# save_stat(data_route=r"island-GA\res\G18test.csv",
+#           file=res,
+#           fig_route=rf'data processing\island GA\images\G18test-{version_num}.jpg',
+#           title="G18 - w 800",
+#           fgsize=(12, 8))
 
-# G43 1000개 테스트 결과
-save_stat(data_route=r"island-GA\res\G43test.csv",
-          file=res,
-          fig_route=rf'data processing\island GA\images\G43test-{version_num}.jpg',
-          title="G43 - un 1000",
-          fgsize=(12, 8))
+# # G43 1000개 테스트 결과
+# save_stat(data_route=r"island-GA\res\G43test.csv",
+#           file=res,
+#           fig_route=rf'data processing\island GA\images\G43test-{version_num}.jpg',
+#           title="G43 - un 1000",
+#           fgsize=(12, 8))
 
-# G53 1000개 테스트 결과
-save_stat(data_route=r"island-GA\res\G53test.csv",
-          file=res,
-          fig_route=rf'data processing\island GA\images\G53test-{version_num}.jpg',
-          title="G53 - un 1000",
-          fgsize=(12, 8))
+# # G53 1000개 테스트 결과
+# save_stat(data_route=r"island-GA\res\G53test.csv",
+#           file=res,
+#           fig_route=rf'data processing\island GA\images\G53test-{version_num}.jpg',
+#           title="G53 - un 1000",
+#           fgsize=(12, 8))
+
+res.write("""# modified code
+
+if (cost_after == cost_before) {
+    stop_count++;
+    temper += abs(cost_after - cost_before) * 0.1;
+}
+else {
+    stop_count = 0;
+    temper += abs(cost_after - cost_before) * 0.2;
+}
+""")
 
 res.close()
