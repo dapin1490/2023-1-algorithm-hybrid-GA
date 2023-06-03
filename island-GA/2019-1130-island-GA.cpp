@@ -21,6 +21,7 @@ class GA {
 private:
 	int idx0 = 1, idx1 = 1, idx2 = 1; // 대륙별 세대 인덱스
 	int n_pool; // 초기 pool 크기
+	long long g_complex; // 그래프 복잡도: pool에 존재하는 cost 최댓값과 최솟값의 차이
 	mt19937 gen; // 난수 생성기
 	clock_t start_timestamp; // 프로그램 시작 시간
 	vector<vector<pair<int, int>>> graph; // 문제 그래프
@@ -37,6 +38,8 @@ private:
 	void set_n_pool(int np) { n_pool = np; }
 	// thresh 설정
 	void set_thresh(int thr) { thresh = thr; };
+	// 그래프 복잡도 설정
+	void set_complex() { g_complex = (long long)(--pool.end())->first - pool.begin()->first; }
 	// 시간 초과 확인
 	bool is_timeout(double deadline, bool is_print);
 	// 현재 pool에서 가장 좋은 해 반환
@@ -114,7 +117,7 @@ int main()
 
 	clock_start = clock();
 
-	// 제출용 입출력
+	/*// 제출용 입출력
 	ifstream input{ "maxcut.in" };
 	ofstream output{ "maxcut.out" };
 
@@ -128,13 +131,13 @@ int main()
 
 	// 노드 500개 테스트
 	ifstream input500{ "res/weighted_500.txt" };
-	ofstream output500{ "res/w500test.csv" };
+	ofstream output500{ "res/w500test.csv" };*/
 
 	// 키메라 테스트
 	ifstream input297{ "res/weighted_chimera_297.txt" };
 	ofstream output297{ "res/wc297test.csv" };
 
-	// G18: 800, 4694 = 992
+	/*// G18: 800, 4694 = 992
 	ifstream inputG18{ "res/G18.txt" };
 	ofstream outputG18{ "res/G18test.csv" };
 
@@ -144,7 +147,7 @@ int main()
 
 	// G53: 1000 5914 = 3850
 	ifstream inputG53{ "res/G53.txt" };
-	ofstream outputG53{ "res/G53test.csv" };
+	ofstream outputG53{ "res/G53test.csv" };*/
 
 	// 프로그램 실행 시작
 	int v, e; // 정점 수 v, 간선 수 e
@@ -155,7 +158,7 @@ int main()
 	double due = 179.8; // 시간 제한(초)
 	int iter = 30; // 반복 수
 
-	// 제출용 실행 코드
+	/*// 제출용 실행 코드
 	input >> v >> e; // 그래프 정보 입력
 
 	graph.clear();
@@ -273,7 +276,7 @@ int main()
 		cout << "test # " << i << "\n";
 		agent = GA(graph);
 		tuple<int, string> sol = agent.execute(due);
-		cout << "time: " << (double(clock()) - iter_start) / CLOCKS_PER_SEC / 60 << "min\n";
+		cout << "time: " << (double(clock()) - iter_start) / CLOCKS_PER_SEC << "s\n";
 		cout << "solution cost: " << get<0>(sol) << "\n\n";
 		output500 << i << "," << get<0>(sol) << "," << agent.to_string_solution() << "\n";
 	}
@@ -286,7 +289,7 @@ int main()
 	cout << "\n누적 실행 시간 : " << clock_duration << "min\n";
 
 	input500.close();
-	output500.close();
+	output500.close();*/
 
 	// wc 297 test
 	clock_start = clock();
@@ -311,7 +314,7 @@ int main()
 		cout << "test # " << i << "\n";
 		agent = GA(graph);
 		tuple<int, string> sol = agent.execute(due);
-		cout << "time: " << (double(clock()) - iter_start) / CLOCKS_PER_SEC / 60 << "min\n";
+		cout << "time: " << (double(clock()) - iter_start) / CLOCKS_PER_SEC << "s\n";
 		cout << "solution cost: " << get<0>(sol) << "\n\n";
 		output297 << i << "," << get<0>(sol) << "," << agent.to_string_solution() << "\n";
 	}
@@ -326,7 +329,7 @@ int main()
 	input297.close();
 	output297.close();
 
-	// w 800 test
+	/*// w 800 test
 	clock_start = clock();
 
 	inputG18 >> v >> e; // 그래프 정보 입력
@@ -438,7 +441,7 @@ int main()
 	cout << "\n누적 실행 시간 : " << clock_duration << "min\n";
 	
 	inputG53.close();
-	outputG53.close();
+	outputG53.close();*/
 
 	cout << "\n프로그램 실행 시간 : " << clock_duration << "min\n";
 
@@ -555,7 +558,7 @@ int GA::validate(string chromosome) {
 	if (flag) {
 		if (memo.find(chromosome) == memo.end())
 			memo.emplace(chromosome, cost);
-		return cost;
+		return memo[chromosome];
 	}
 	else // 두 부류가 서로 연결되지 않았다면 무효한 해
 		return INT_MIN;
@@ -734,8 +737,10 @@ void GA::local_opt(double deadline) {
 	string ans_before = get<1>(sol), ans_after = get<1>(sol);
 	int cost_before = get<0>(sol), cost_after = get<0>(sol);
 	bool improved = true;
-	int stop_count = 0;
+	long long stop_count = 0, stop_cut = pow(g_complex, 2);
 	default_random_engine rng(random_device{}());
+	int temper = (int)g_complex * 0.7;
+	uniform_int_distribution<int> dis(1, (int)g_complex);
 
 	if (memo.find(ans_before) == memo.end()) {
 		memo.emplace(ans_before, cost_before);
@@ -749,7 +754,7 @@ void GA::local_opt(double deadline) {
 			ans_after = ans_before;
 			cost_after = cost_before;
 
-			if (is_timeout(deadline) || stop_count >= graph.size() * graph.size()) {
+			if (is_timeout(deadline) || stop_count >= stop_cut) {
 				this->sol = make_tuple(cost_after, ans_after);
 				if (pool.find(cost_after) == pool.end()) { // 추가할 자식의 cost가 pool에 없으면 추가
 					pool.emplace(cost_after, vector<vector<string>>(3));
@@ -770,17 +775,29 @@ void GA::local_opt(double deadline) {
 			}
 			else {
 				cost_after = validate(ans_after);
-				memo.emplace(ans_after, cost_after);
 			}
 
 			if (cost_after >= cost_before) {
-				if (cost_after == cost_before)
+				if (cost_after == cost_before) {
 					stop_count++;
-				else
+					temper += abs(cost_after - cost_before) * 0.2;
+				}
+				else {
 					stop_count = 0;
+					temper += abs(cost_after - cost_before) * 0.1;
+				}
 				ans_before = ans_after;
 				cost_before = cost_after;
 				improved = true;
+				break;
+			}
+			else if (dis(gen) <= temper) {
+				stop_count++;
+				temper -= abs(cost_before - cost_after);
+				ans_before = ans_after;
+				cost_before = cost_after;
+				improved = true;
+				break;
 			}
 		}
 	}
@@ -869,6 +886,8 @@ void GA::evolution(double due, int contin, int k, double cut_rate = 0.3) {
 				cut_count++;
 		}
 
+		set_complex(); // 그래프 복잡도 업데이트
+
 		//print_pool((*idx)++, contin);
 
 		// 시간 제한 확인
@@ -887,8 +906,6 @@ void GA::evolution(double due, int contin, int k, double cut_rate = 0.3) {
 // pool에 존재하는 모든 해의 cost 출력
 void GA::print_pool(int idx, int contin) {
 	map<int, vector<vector<string>>>::iterator iter; // map iterator: https://dar0m.tistory.com/98
-	string index = to_string(idx).append(",");
-	string cont_a = index, cont_b = index, cont_total = index;
 
 	cout << idx << "," << contin << ",";
 
@@ -955,11 +972,13 @@ tuple<int, string> GA::execute(double due = 179.8) { // due: 프로그램 실행
 	}
 
 	// 부모 쌍 cost 차이 제한
-	set_thresh(max(int(((--pool.end())->first - pool.begin()->first) * 0.1), 5));
+	set_complex();
+	set_thresh(max(int(g_complex * 0.1), 5));
 
 	// 1차 진화: continentA
 	evolution(due, 0, k);
 	local_opt(due * 0.1); // 지역 최적화
+	set_complex();
 
 	// 시간 제한 확인
 	if (is_timeout(due)) {
@@ -969,6 +988,7 @@ tuple<int, string> GA::execute(double due = 179.8) { // due: 프로그램 실행
 	// 1차 진화: continentB
 	evolution(due, 1, k);
 	local_opt(due * 0.2); // 지역 최적화
+	set_complex();
 
 	// 시간 제한 확인
 	if (is_timeout(due)) {
@@ -978,6 +998,7 @@ tuple<int, string> GA::execute(double due = 179.8) { // due: 프로그램 실행
 	// 2차 진화: continent total
 	flat_pool(); // 대륙 통일
 	local_opt(due * 0.3); // 지역 최적화
+	set_complex();
 	evolution(due, 2, k);
 
 	// 시간 제한 확인
