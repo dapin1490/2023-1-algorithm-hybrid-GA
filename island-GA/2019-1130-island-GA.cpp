@@ -117,7 +117,7 @@ int main()
 
 	clock_start = clock();
 
-	/*// 제출용 입출력
+	// 제출용 입출력
 	ifstream input{ "maxcut.in" };
 	ofstream output{ "maxcut.out" };
 
@@ -131,7 +131,7 @@ int main()
 
 	// 노드 500개 테스트
 	ifstream input500{ "res/weighted_500.txt" };
-	ofstream output500{ "res/w500test.csv" };*/
+	ofstream output500{ "res/w500test.csv" };
 
 	// 키메라 테스트
 	ifstream input297{ "res/weighted_chimera_297.txt" };
@@ -155,10 +155,10 @@ int main()
 	int w; // 가중치
 	vector<vector<pair<int, int>>> graph;
 	GA agent;
-	double due = 179.8; // 시간 제한(초)
+	double due = 179.9; // 시간 제한(초)
 	int iter = 30; // 반복 수
 
-	/*// 제출용 실행 코드
+	// 제출용 실행 코드
 	input >> v >> e; // 그래프 정보 입력
 
 	graph.clear();
@@ -271,7 +271,7 @@ int main()
 	// weighted_500.txt 테스트
 	cout << "\nres/weighted_500.txt 테스트\n";
 	output500 << ",cost,solution\n";
-	for (int i = 1; i <= iter + 5; i++) {
+	for (int i = 1; i <= iter * 0; i++) {
 		double iter_start = double(clock());
 		cout << "test # " << i << "\n";
 		agent = GA(graph);
@@ -289,7 +289,7 @@ int main()
 	cout << "\n누적 실행 시간 : " << clock_duration << "min\n";
 
 	input500.close();
-	output500.close();*/
+	output500.close();
 
 	// wc 297 test
 	clock_start = clock();
@@ -309,7 +309,7 @@ int main()
 	// weighted_chimera_297.txt 테스트
 	cout << "\nres/weighted_chimera_297.txt 테스트\n";
 	output297 << ",cost,solution\n";
-	for (int i = 1; i <= iter; i++) {
+	for (int i = 1; i <= iter * 2; i++) {
 		double iter_start = double(clock());
 		cout << "test # " << i << "\n";
 		agent = GA(graph);
@@ -780,11 +780,11 @@ void GA::local_opt(double deadline) {
 			if (cost_after >= cost_before) {
 				if (cost_after == cost_before) {
 					stop_count++;
-					temper += abs(cost_after - cost_before) * 0.1;
+					temper += abs(cost_after - cost_before) * 0.2;
 				}
 				else {
 					stop_count = 0;
-					temper += abs(cost_after - cost_before) * 0.2;
+					temper += abs(cost_after - cost_before) * 0.4;
 				}
 				ans_before = ans_after;
 				cost_before = cost_after;
