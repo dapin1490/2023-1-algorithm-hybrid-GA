@@ -197,7 +197,7 @@ int main()
 	// unweighted_50.txt 테스트
 	cout << "\nres/unweighted_50.txt 테스트 \n";
 	output50 << ",cost,solution\n";
-	for (int i = 1; i <= iter + 20; i++) {
+	for (int i = 1; i <= iter; i++) {
 		double iter_start = double(clock());
 		cout << "test # " << i << "\n";
 		agent = GA(graph);
@@ -234,7 +234,7 @@ int main()
 	// unweighted_100.txt 테스트
 	cout << "\nres/unweighted_100.txt test\n";
 	output100 << ",cost,solution\n";
-	for (int i = 1; i <= iter + 20; i++) {
+	for (int i = 1; i <= iter; i++) {
 		double iter_start = double(clock());
 		cout << "test # " << i << "\n";
 		agent = GA(graph);
@@ -780,11 +780,11 @@ void GA::local_opt(double deadline) {
 			if (cost_after >= cost_before) {
 				if (cost_after == cost_before) {
 					stop_count++;
-					temper += abs(cost_after - cost_before) * 0.2;
+					temper += abs(cost_after - cost_before) * 0.25;
 				}
 				else {
 					stop_count = 0;
-					temper += abs(cost_after - cost_before) * 0.4;
+					temper += abs(cost_after - cost_before) * 0.45;
 				}
 				ans_before = ans_after;
 				cost_before = cost_after;

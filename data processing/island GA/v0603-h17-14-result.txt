@@ -1,0 +1,44 @@
+unweighted 50
+            cost
+count  30.000000
+mean   98.733333
+std     0.944433
+min    94.000000
+25%    99.000000
+50%    99.000000
+75%    99.000000
+max    99.000000
+
+unweighted 100
+             cost
+count   30.000000
+mean   354.866667
+std      2.800657
+min    347.000000
+25%    353.000000
+50%    355.000000
+75%    357.750000
+max    358.000000
+
+weighted chimera 297
+              cost
+count    60.000000
+mean   7718.600000
+std     712.653985
+min    5372.000000
+25%    7396.000000
+50%    7912.000000
+75%    8181.000000
+max    8556.000000
+
+
+# modified code
+
+if (cost_after == cost_before) {
+    stop_count++;
+    temper += abs(cost_after - cost_before) * 0.25;
+}
+else {
+    stop_count = 0;
+    temper += abs(cost_after - cost_before) * 0.45;
+}
