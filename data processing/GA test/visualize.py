@@ -4,6 +4,7 @@ from matplotlib.container import BarContainer
 from io import TextIOWrapper
 from datetime import datetime
 from math import ceil, floor
+import os
 
 # bar 그래프의 막대 위에 값 쓰기
 def bar_caption(_bar: BarContainer) -> BarContainer:
@@ -68,54 +69,57 @@ def save_stat(data_route: str, file: TextIOWrapper, fig_route: str, title: str, 
 # hybrid GA
 version_num = f"v{datetime.today().month :02d}{datetime.today().day :02d}-h{datetime.today().hour :02d}-{datetime.today().minute :02d}"
 print(version_num)
-res = open(rf'data processing\island GA\result-{version_num}.txt', 'w', encoding='utf-8')
+res = open(rf'data processing\island GA\{version_num}-result.txt', 'w', encoding='utf-8')
+
+if not os.path.exists(f'data processing\island GA\images\{version_num}'):
+    os.mkdir(f'data processing\island GA\images\{version_num}')
 
 # 노드 50개 테스트 결과
 save_stat(data_route=r"island-GA\res\un50test.csv",
           file=res,
-          fig_route=rf'data processing\island GA\images\un50test-{version_num}.jpg',
+          fig_route=rf'data processing\island GA\images\{version_num}\un50test.jpg',
           title="unweighted 50",
           fgsize=(15, 8))
 
 # 노드 100개 테스트 결과
 save_stat(data_route=r"island-GA\res\un100test.csv",
           file=res,
-          fig_route=rf'data processing\island GA\images\un100testf-{version_num}.jpg',
+          fig_route=rf'data processing\island GA\images\{version_num}\un100testf.jpg',
           title="unweighted 100",
           fgsize=(15, 8))
 
 # 노드 500개 테스트 결과
-save_stat(data_route=r"island-GA\res\w500test.csv",
-          file=res,
-          fig_route=rf'data processing\island GA\images\w500test-{version_num}.jpg',
-          title="weighted 500",
-          fgsize=(12, 10))
+# save_stat(data_route=r"island-GA\res\w500test.csv",
+#           file=res,
+#           fig_route=rf'data processing\island GA\images\{version_num}\w500test.jpg',
+#           title="weighted 500",
+#           fgsize=(12, 10))
 
 # 키메라 297개 테스트 결과
 save_stat(data_route=r"island-GA\res\wc297test.csv",
           file=res,
-          fig_route=rf'data processing\island GA\images\wc297test-{version_num}.jpg',
+          fig_route=rf'data processing\island GA\images\{version_num}\wc297test.jpg',
           title="weighted chimera 297",
           fgsize=(12, 10))
 
 # G18 800개 테스트 결과
 # save_stat(data_route=r"island-GA\res\G18test.csv",
 #           file=res,
-#           fig_route=rf'data processing\island GA\images\G18test-{version_num}.jpg',
+#           fig_route=rf'data processing\island GA\images\{version_num}\G18test.jpg',
 #           title="G18 - w 800",
 #           fgsize=(12, 8))
 
 # # G43 1000개 테스트 결과
 # save_stat(data_route=r"island-GA\res\G43test.csv",
 #           file=res,
-#           fig_route=rf'data processing\island GA\images\G43test-{version_num}.jpg',
+#           fig_route=rf'data processing\island GA\images\{version_num}\G43test.jpg',
 #           title="G43 - un 1000",
 #           fgsize=(12, 8))
 
 # # G53 1000개 테스트 결과
 # save_stat(data_route=r"island-GA\res\G53test.csv",
 #           file=res,
-#           fig_route=rf'data processing\island GA\images\G53test-{version_num}.jpg',
+#           fig_route=rf'data processing\island GA\images\{version_num}\G53test.jpg',
 #           title="G53 - un 1000",
 #           fgsize=(12, 8))
 
@@ -123,11 +127,11 @@ res.write("""# modified code
 
 if (cost_after == cost_before) {
     stop_count++;
-    temper += abs(cost_after - cost_before) * 0.1;
+    temper += abs(cost_after - cost_before) * 0.2;
 }
 else {
     stop_count = 0;
-    temper += abs(cost_after - cost_before) * 0.2;
+    temper += abs(cost_after - cost_before) * 0.4;
 }
 """)
 
