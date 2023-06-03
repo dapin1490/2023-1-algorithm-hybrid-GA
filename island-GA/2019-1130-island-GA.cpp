@@ -196,7 +196,7 @@ int main()
 
 	// unweighted_50.txt 테스트
 	cout << "\nres/unweighted_50.txt 테스트 \n";
-	output50 << ",cost,solution\n";
+	output50 << ",cost,time,solution\n";
 	for (int i = 1; i <= iter; i++) {
 		double iter_start = double(clock());
 		cout << "test # " << i << "\n";
@@ -204,7 +204,7 @@ int main()
 		tuple<int, string> sol = agent.execute(due);
 		cout << "time: " << (double(clock()) - iter_start) / CLOCKS_PER_SEC << "s\n";
 		cout << "solution cost: " << get<0>(sol) << "\n\n";
-		output50 << i << "," << get<0>(sol) << "," << agent.to_string_solution() << "\n";
+		output50 << i << "," << get<0>(sol) << "," << (double(clock()) - iter_start) / CLOCKS_PER_SEC << "," << agent.to_string_solution() << "\n";
 	}
 
 	clock_finish = clock();
@@ -233,7 +233,7 @@ int main()
 
 	// unweighted_100.txt 테스트
 	cout << "\nres/unweighted_100.txt test\n";
-	output100 << ",cost,solution\n";
+	output100 << ",cost,time,solution\n";
 	for (int i = 1; i <= iter; i++) {
 		double iter_start = double(clock());
 		cout << "test # " << i << "\n";
@@ -241,7 +241,7 @@ int main()
 		tuple<int, string> sol = agent.execute(due);
 		cout << "time: " << (double(clock()) - iter_start) / CLOCKS_PER_SEC << "s\n";
 		cout << "solution cost: " << get<0>(sol) << "\n\n";
-		output100 << i << "," << get<0>(sol) << "," << agent.to_string_solution() << "\n";
+		output100 << i << "," << get<0>(sol) << "," << (double(clock()) - iter_start) / CLOCKS_PER_SEC << "," << agent.to_string_solution() << "\n";
 	}
 
 	clock_finish = clock();
@@ -270,7 +270,7 @@ int main()
 
 	// weighted_500.txt 테스트
 	cout << "\nres/weighted_500.txt 테스트\n";
-	output500 << ",cost,solution\n";
+	output500 << ",cost,time,solution\n";
 	for (int i = 1; i <= iter * 0; i++) {
 		double iter_start = double(clock());
 		cout << "test # " << i << "\n";
@@ -278,7 +278,7 @@ int main()
 		tuple<int, string> sol = agent.execute(due);
 		cout << "time: " << (double(clock()) - iter_start) / CLOCKS_PER_SEC << "s\n";
 		cout << "solution cost: " << get<0>(sol) << "\n\n";
-		output500 << i << "," << get<0>(sol) << "," << agent.to_string_solution() << "\n";
+		output500 << i << "," << get<0>(sol) << "," << (double(clock()) - iter_start) / CLOCKS_PER_SEC << "," << agent.to_string_solution() << "\n";
 	}
 
 	// 종료 시간 측정
@@ -308,15 +308,15 @@ int main()
 
 	// weighted_chimera_297.txt 테스트
 	cout << "\nres/weighted_chimera_297.txt 테스트\n";
-	output297 << ",cost,solution\n";
-	for (int i = 1; i <= iter * 2; i++) {
+	output297 << ",cost,time,solution\n";
+	for (int i = 1; i <= iter; i++) {
 		double iter_start = double(clock());
 		cout << "test # " << i << "\n";
 		agent = GA(graph);
 		tuple<int, string> sol = agent.execute(due);
 		cout << "time: " << (double(clock()) - iter_start) / CLOCKS_PER_SEC << "s\n";
 		cout << "solution cost: " << get<0>(sol) << "\n\n";
-		output297 << i << "," << get<0>(sol) << "," << agent.to_string_solution() << "\n";
+		output297 << i << "," << get<0>(sol) << "," << (double(clock()) - iter_start) / CLOCKS_PER_SEC << "," << agent.to_string_solution() << "\n";
 	}
 
 	// 종료 시간 측정
@@ -793,7 +793,7 @@ void GA::local_opt(double deadline) {
 			}
 			else if (dis(gen) <= temper) {
 				stop_count++;
-				temper -= abs(cost_before - cost_after);
+				temper -= abs(cost_before - cost_after) * 0.5;
 				ans_before = ans_after;
 				cost_before = cost_after;
 				improved = true;
