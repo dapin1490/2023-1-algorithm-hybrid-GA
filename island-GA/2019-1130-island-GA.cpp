@@ -780,11 +780,11 @@ void GA::local_opt(double deadline) {
 			if (cost_after >= cost_before) {
 				if (cost_after == cost_before) {
 					stop_count++;
-					temper += abs(cost_after - cost_before) * 0.2;
+					temper += abs(cost_after - cost_before) * 0.1;
 				}
 				else {
 					stop_count = 0;
-					temper += abs(cost_after - cost_before) * 0.1;
+					temper += abs(cost_after - cost_before) * 0.2;
 				}
 				ans_before = ans_after;
 				cost_before = cost_after;
