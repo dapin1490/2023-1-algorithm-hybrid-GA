@@ -813,7 +813,7 @@ void GA::local_opt(double deadline) {
 }
 
 // 대륙별 진화
-void GA::evolution(double due, int contin, int k, double cut_rate = 0.3) {
+void GA::evolution(double due, int contin, int k, double cut_rate = 0.4) {
 	/*
 	* 부모 선택
 	* 돌연변이
