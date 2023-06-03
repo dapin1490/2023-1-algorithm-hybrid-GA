@@ -123,15 +123,16 @@ save_stat(data_route=r"island-GA\res\wc297test.csv",
 #           title="G53 - un 1000",
 #           fgsize=(12, 8))
 
-res.write("""# modified code
+res.write("""
+# modified code
 
 if (cost_after == cost_before) {
     stop_count++;
-    temper += abs(cost_after - cost_before) * 0.2;
+    temper += abs(cost_after - cost_before) * 0.21;
 }
 else {
     stop_count = 0;
-    temper += abs(cost_after - cost_before) * 0.4;
+    temper += abs(cost_after - cost_before) * 0.41;
 }
 """)
 
