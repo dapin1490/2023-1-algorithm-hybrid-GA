@@ -139,6 +139,7 @@
     <Text Include="res\unweighted_100.txt" />
     <Text Include="res\unweighted_50.txt" />
     <Text Include="res\weighted_500.txt" />
+    <Text Include="res\weighted_chimera_297.txt" />
   </ItemGroup>
   <ItemGroup>
     <None Include="maxcut.in" />

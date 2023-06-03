@@ -37,6 +37,7 @@ def save_stat(data_route: str, file: TextIOWrapper, fig_route: str, title: str, 
     plt.yticks(rotation=0)
 
     plt.savefig(fig_route, bbox_inches='tight')  # 그래프 저장
+    print(f"saved {title}")
     return
 
 # basic GA
@@ -87,6 +88,13 @@ save_stat(data_route=r"island-GA\res\w500test.csv",
           file=res,
           fig_route=rf'data processing\island GA\images\w500test-{version_num}.jpg',
           title="weighted 500",
+          fgsize=(12, 10))
+
+# 키메라 297개 테스트 결과
+save_stat(data_route=r"island-GA\res\wc297test.csv",
+          file=res,
+          fig_route=rf'data processing\island GA\images\wc297test-{version_num}.jpg',
+          title="weighted chimera 297",
           fgsize=(12, 10))
 
 # G18 800개 테스트 결과

@@ -38,7 +38,7 @@ private:
 	// thresh 설정
 	void set_thresh(int thr) { thresh = thr; };
 	// 시간 초과 확인
-	bool is_timeout(int deadline, bool is_print);
+	bool is_timeout(double deadline, bool is_print);
 	// 현재 pool에서 가장 좋은 해 반환
 	tuple<int, string> get_current_best();
 	// flatten two continents into one continent
@@ -56,9 +56,9 @@ private:
 	// 세대 교체
 	bool replacement(string chromosome, int cost, int contin);
 	// 최고 해 지역 최적화
-	void local_opt(int deadline);
+	void local_opt(double deadline);
 	// 대륙별 진화
-	void evolution(int due, int contin, int k, double cut_rate);
+	void evolution(double due, int contin, int k, double cut_rate);
 
 	// pool에 존재하는 모든 해의 cost 출력
 	void print_pool(int idx, int contin);
@@ -96,7 +96,7 @@ public:
 	}
 
 	// 유전 알고리즘 실행
-	tuple<int, string> execute(int due = 30);
+	tuple<int, string> execute(double due);
 	// 해 문자열과 가중치 반환
 	tuple<int, string> get_solution();
 	// 정답 반환
@@ -114,9 +114,9 @@ int main()
 
 	clock_start = clock();
 
-	/*// 제출용 입출력
+	// 제출용 입출력
 	ifstream input{ "maxcut.in" };
-	ofstream output{ "maxcut.out" };*/
+	ofstream output{ "maxcut.out" };
 
 	// 노드 50개 테스트
 	ifstream input50{ "res/unweighted_50.txt" };
@@ -130,7 +130,11 @@ int main()
 	ifstream input500{ "res/weighted_500.txt" };
 	ofstream output500{ "res/w500test.csv" };
 
-	/*// G18: 800, 4694 = 992
+	// 키메라 테스트
+	ifstream input297{ "res/weighted_chimera_297.txt" };
+	ofstream output297{ "res/wc297test.csv" };
+
+	// G18: 800, 4694 = 992
 	ifstream inputG18{ "res/G18.txt" };
 	ofstream outputG18{ "res/G18test.csv" };
 
@@ -140,7 +144,7 @@ int main()
 
 	// G53: 1000 5914 = 3850
 	ifstream inputG53{ "res/G53.txt" };
-	ofstream outputG53{ "res/G53test.csv" };*/
+	ofstream outputG53{ "res/G53test.csv" };
 
 	// 프로그램 실행 시작
 	int v, e; // 정점 수 v, 간선 수 e
@@ -148,9 +152,10 @@ int main()
 	int w; // 가중치
 	vector<vector<pair<int, int>>> graph;
 	GA agent;
-	int due = 178, iter = 40; // 시간 제한(초), 반복 수
+	double due = 179.8; // 시간 제한(초)
+	int iter = 30; // 반복 수
 
-	/*// 제출용 실행 코드
+	// 제출용 실행 코드
 	input >> v >> e; // 그래프 정보 입력
 
 	graph.clear();
@@ -166,7 +171,10 @@ int main()
 	// 유전 알고리즘 실행 후 결과 출력
 	agent = GA(graph);
 	tuple<int, string> sol = agent.execute(due);
-	output << agent.to_string_solution() << "\n";*/
+	output << agent.to_string_solution() << "\n";
+
+	input.close();
+	output.close();
 
 	// un 50 test
 	clock_start = clock();
@@ -186,7 +194,7 @@ int main()
 	// unweighted_50.txt 테스트
 	cout << "\nres/unweighted_50.txt 테스트 \n";
 	output50 << ",cost,solution\n";
-	for (int i = 1; i <= iter; i++) {
+	for (int i = 1; i <= iter + 20; i++) {
 		double iter_start = double(clock());
 		cout << "test # " << i << "\n";
 		agent = GA(graph);
@@ -201,6 +209,9 @@ int main()
 	clock_duration += (double(clock_finish) - double(clock_start)) / CLOCKS_PER_SEC / 60; // 분 단위로 환산
 	cout << "un 50: " << (double(clock_finish) - double(clock_start)) / CLOCKS_PER_SEC / 60 << "min";
 	cout << "\n누적 실행 시간 : " << clock_duration << "min\n";
+
+	input50.close();
+	output50.close();
 
 	// un 100 test
 	clock_start = clock();
@@ -220,7 +231,7 @@ int main()
 	// unweighted_100.txt 테스트
 	cout << "\nres/unweighted_100.txt test\n";
 	output100 << ",cost,solution\n";
-	for (int i = 1; i <= iter; i++) {
+	for (int i = 1; i <= iter + 20; i++) {
 		double iter_start = double(clock());
 		cout << "test # " << i << "\n";
 		agent = GA(graph);
@@ -235,6 +246,9 @@ int main()
 	clock_duration += (double(clock_finish) - double(clock_start)) / CLOCKS_PER_SEC / 60; // 분 단위로 환산
 	cout << "un 100: " << (double(clock_finish) - double(clock_start)) / CLOCKS_PER_SEC / 60 << "min";
 	cout << "\n누적 실행 시간 : " << clock_duration << "min\n";
+
+	input100.close();
+	output100.close();
 
 	// w 500 test
 	clock_start = clock();
@@ -254,7 +268,7 @@ int main()
 	// weighted_500.txt 테스트
 	cout << "\nres/weighted_500.txt 테스트\n";
 	output500 << ",cost,solution\n";
-	for (int i = 1; i <= iter; i++) {
+	for (int i = 1; i <= iter + 5; i++) {
 		double iter_start = double(clock());
 		cout << "test # " << i << "\n";
 		agent = GA(graph);
@@ -271,7 +285,48 @@ int main()
 	cout << "w 500: " << (double(clock_finish) - double(clock_start)) / CLOCKS_PER_SEC / 60 << "min";
 	cout << "\n누적 실행 시간 : " << clock_duration << "min\n";
 
-	/*// w 800 test
+	input500.close();
+	output500.close();
+
+	// wc 297 test
+	clock_start = clock();
+
+	input297 >> v >> e; // 그래프 정보 입력
+
+	graph.clear();
+	graph.resize(v + 1, vector<pair<int, int>>()); // 그래프 생성
+
+	// 그래프 노드 입력
+	for (int i = 0; i < e; i++) {
+		input297 >> from >> to >> w;
+		graph[from].emplace_back(to, w);
+		graph[to].emplace_back(from, w);
+	}
+
+	// weighted_chimera_297.txt 테스트
+	cout << "\nres/weighted_chimera_297.txt 테스트\n";
+	output297 << ",cost,solution\n";
+	for (int i = 1; i <= iter; i++) {
+		double iter_start = double(clock());
+		cout << "test # " << i << "\n";
+		agent = GA(graph);
+		tuple<int, string> sol = agent.execute(due);
+		cout << "time: " << (double(clock()) - iter_start) / CLOCKS_PER_SEC / 60 << "min\n";
+		cout << "solution cost: " << get<0>(sol) << "\n\n";
+		output297 << i << "," << get<0>(sol) << "," << agent.to_string_solution() << "\n";
+	}
+
+	// 종료 시간 측정
+	clock_finish = clock();
+
+	clock_duration += (double(clock_finish) - double(clock_start)) / CLOCKS_PER_SEC / 60; // 분 단위로 환산
+	cout << "wc 297: " << (double(clock_finish) - double(clock_start)) / CLOCKS_PER_SEC / 60 << "min";
+	cout << "\n누적 실행 시간 : " << clock_duration << "min\n";
+
+	input297.close();
+	output297.close();
+
+	// w 800 test
 	clock_start = clock();
 
 	inputG18 >> v >> e; // 그래프 정보 입력
@@ -295,6 +350,7 @@ int main()
 		agent = GA(graph);
 		tuple<int, string> sol = agent.execute(due);
 		cout << "time: " << (double(clock()) - iter_start) / CLOCKS_PER_SEC << "s\n";
+		cout << "solution cost: " << get<0>(sol) << "\n\n";
 		cout << "solution error: " << get<0>(sol) - 992 << "\n\n";
 		outputG18 << i << "," << get<0>(sol) << "," << agent.to_string_solution() << "\n";
 	}
@@ -304,6 +360,9 @@ int main()
 	clock_duration += (double(clock_finish) - double(clock_start)) / CLOCKS_PER_SEC / 60; // 분 단위로 환산
 	cout << "G18 - w 800: " << (double(clock_finish) - double(clock_start)) / CLOCKS_PER_SEC / 60 << "min";
 	cout << "\n누적 실행 시간 : " << clock_duration << "min\n";
+
+	inputG18.close();
+	outputG18.close();
 
 	// un 1000 test
 	clock_start = clock();
@@ -329,6 +388,7 @@ int main()
 		agent = GA(graph);
 		tuple<int, string> sol = agent.execute(due);
 		cout << "time: " << (double(clock()) - iter_start) / CLOCKS_PER_SEC << "s\n";
+		cout << "solution cost: " << get<0>(sol) << "\n\n";
 		cout << "solution error: " << get<0>(sol) - 6660 << "\n\n";
 		outputG43 << i << "," << get<0>(sol) << "," << agent.to_string_solution() << "\n";
 	}
@@ -338,6 +398,9 @@ int main()
 	clock_duration += (double(clock_finish) - double(clock_start)) / CLOCKS_PER_SEC / 60; // 분 단위로 환산
 	cout << "G43 - un 1000: " << (double(clock_finish) - double(clock_start)) / CLOCKS_PER_SEC / 60 << "min";
 	cout << "\n누적 실행 시간 : " << clock_duration << "min\n";
+
+	inputG43.close();
+	outputG43.close();
 
 	// un 1000 test
 	clock_start = clock();
@@ -363,6 +426,7 @@ int main()
 		agent = GA(graph);
 		tuple<int, string> sol = agent.execute(due);
 		cout << "time: " << (double(clock()) - iter_start) / CLOCKS_PER_SEC << "s\n";
+		cout << "solution cost: " << get<0>(sol) << "\n\n";
 		cout << "solution error: " << get<0>(sol) - 3850 << "\n\n";
 		outputG53 << i << "," << get<0>(sol) << "," << agent.to_string_solution() << "\n";
 	}
@@ -371,7 +435,10 @@ int main()
 
 	clock_duration += (double(clock_finish) - double(clock_start)) / CLOCKS_PER_SEC / 60; // 분 단위로 환산
 	cout << "G53 - un 1000: " << (double(clock_finish) - double(clock_start)) / CLOCKS_PER_SEC / 60 << "min";
-	cout << "\n누적 실행 시간 : " << clock_duration << "min\n";*/
+	cout << "\n누적 실행 시간 : " << clock_duration << "min\n";
+	
+	inputG53.close();
+	outputG53.close();
 
 	cout << "\n프로그램 실행 시간 : " << clock_duration << "min\n";
 
@@ -379,9 +446,8 @@ int main()
 }
 
 // 제한 시간 초과 확인
-bool GA::is_timeout(int deadline, bool is_print = false) {
-	clock_t running_time = clock();
-	double time_len = (double(running_time) - double(start_timestamp)) / CLOCKS_PER_SEC;
+bool GA::is_timeout(double deadline, bool is_print = false) {
+	double time_len = double(clock() - start_timestamp) / CLOCKS_PER_SEC;
 	if (is_print)
 		cout << "current time: " << time_len << "\n";
 	if (time_len >= deadline) {
@@ -546,7 +612,7 @@ tuple<string, int, string, int> GA::selection(int contin) {
 		candidates.push(ca); // 후보 추가
 	}
 
-	// 뽑힌 cost로 토너먼트: 승자를 왼쪽에 저장, 최종 승자는 0번에 저장됨
+	// 뽑힌 cost로 토너먼트: 승자를 큐에 다시 넣어 마지막 하나가 남을 때까지 승부
 	while (candidates.size() >= 2) {
 		ca = candidates.front();
 		candidates.pop();
@@ -663,7 +729,7 @@ bool GA::replacement(string chromosome, int cost, int contin) {
 }
 
 // 최고 해 지역 최적화
-void GA::local_opt(int deadline) {
+void GA::local_opt(double deadline) {
 	this->sol = get_current_best();
 	string ans_before = get<1>(sol), ans_after = get<1>(sol);
 	int cost_before = get<0>(sol), cost_after = get<0>(sol);
@@ -730,7 +796,7 @@ void GA::local_opt(int deadline) {
 }
 
 // 대륙별 진화
-void GA::evolution(int due, int contin, int k, double cut_rate = 0.3) {
+void GA::evolution(double due, int contin, int k, double cut_rate = 0.3) {
 	/*
 	* 부모 선택
 	* 돌연변이
@@ -839,7 +905,7 @@ void GA::print_pool(int idx, int contin) {
 }
 
 // 유전 알고리즘 실행
-tuple<int, string> GA::execute(int due) { // due: 프로그램 실행 마감시간
+tuple<int, string> GA::execute(double due = 179.8) { // due: 프로그램 실행 마감시간
 	/*
 	* 랜덤 해 생성
 	* 대륙 내 교배
@@ -850,7 +916,7 @@ tuple<int, string> GA::execute(int due) { // due: 프로그램 실행 마감시�
 	* 대륙 외 교배
 	* 2차 수렴 후 종료
 	*/
-	set_n_pool(min(150, int(37500 / (this->graph.size() - 1)))); // 초기 생성 pool 크기
+	set_n_pool(max(20, int(20000 / (this->graph.size() - 1)))); // 초기 생성 pool 크기
 	int k = n_pool * 0.3; // 한 세대 수
 	uniform_int_distribution<int> plz_add_me(1, 100); // 대체 대상이 없는 자식이 pool에 추가될 확률 2%
 	bool is_child_added = false; // 자식이 pool에 추가되었는지
