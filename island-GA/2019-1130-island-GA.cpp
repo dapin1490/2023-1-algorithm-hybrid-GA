@@ -271,7 +271,7 @@ int main()
 	// weighted_500.txt 테스트
 	cout << "\nres/weighted_500.txt 테스트\n";
 	output500 << ",cost,time,solution\n";
-	for (int i = 1; i <= iter * 0; i++) {
+	for (int i = 1; i <= iter; i++) {
 		double iter_start = double(clock());
 		cout << "test # " << i << "\n";
 		agent = GA(graph);
@@ -309,7 +309,7 @@ int main()
 	// weighted_chimera_297.txt 테스트
 	cout << "\nres/weighted_chimera_297.txt 테스트\n";
 	output297 << ",cost,time,solution\n";
-	for (int i = 1; i <= iter; i++) {
+	for (int i = 1; i <= iter * 2; i++) {
 		double iter_start = double(clock());
 		cout << "test # " << i << "\n";
 		agent = GA(graph);

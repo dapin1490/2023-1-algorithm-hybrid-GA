@@ -89,11 +89,11 @@ save_stat(data_route=r"island-GA\res\un100test.csv",
           fgsize=(15, 8))
 
 # 노드 500개 테스트 결과
-# save_stat(data_route=r"island-GA\res\w500test.csv",
-#           file=res,
-#           fig_route=rf'data processing\island GA\images\{version_num}\w500test.jpg',
-#           title="weighted 500",
-#           fgsize=(12, 10))
+save_stat(data_route=r"island-GA\res\w500test.csv",
+          file=res,
+          fig_route=rf'data processing\island GA\images\{version_num}\w500test.jpg',
+          title="weighted 500",
+          fgsize=(12, 10))
 
 # 키메라 297개 테스트 결과
 save_stat(data_route=r"island-GA\res\wc297test.csv",
@@ -122,18 +122,5 @@ save_stat(data_route=r"island-GA\res\wc297test.csv",
 #           fig_route=rf'data processing\island GA\images\{version_num}\G53test.jpg',
 #           title="G53 - un 1000",
 #           fgsize=(12, 8))
-
-res.write("""
-# modified code
-
-if (cost_after == cost_before) {
-    stop_count++;
-    temper += abs(cost_after - cost_before) * 0.19;
-}
-else {
-    stop_count = 0;
-    temper += abs(cost_after - cost_before) * 0.38;
-}
-""")
 
 res.close()
