@@ -11,6 +11,8 @@ def process_pool(data_route: str, title: str, to_save: str):
     data1.to_csv(to_save + f"{title}-1.csv")
     data2.to_csv(to_save + f"{title}-2.csv")
 
+    print(f'{title} processed')
+
     return
 
 def unzip_pool(where_to_save: str, data_route: str, data_: pd.DataFrame = None):
@@ -37,7 +39,7 @@ def unzip_pool(where_to_save: str, data_route: str, data_: pd.DataFrame = None):
         total_pool[i] += [None] * (max_len - len(total_pool[i]))
 
     total_pool = pd.DataFrame.from_dict(total_pool)
-    print(f"{total_pool.tail()}\n")
+    # print(f"{total_pool.tail()}\n")
 
     # generation,count,mean,std,min,25%,50%,75%,max
     res.write(f"generation,count,mean,std,min,25%,50%,75%,max\n")
@@ -54,8 +56,23 @@ def unzip_pool(where_to_save: str, data_route: str, data_: pd.DataFrame = None):
         res.write(f"{i},{icount},{imean:.4f},{istd:.4f},{imin},{i25},{i50},{i75},{imax}\n")
 
     res.close()
+    print(f'\nunziped \'{data_route}\'')
     return
 
+def connect_pool(route_base: str, title: str):
+    cont0 = pd.read_csv(route_base + title + '-describe-cont0.csv', header=0, index_col=0, encoding='utf-8')
+    cont1 = pd.read_csv(route_base + title + '-describe-cont1.csv', header=0, index_col=0, encoding='utf-8')
+    cont2 = pd.read_csv(route_base + title + '-describe-cont2.csv', header=0, index_col=0, encoding='utf-8')
+
+    cont_total = pd.concat([cont0, cont1, cont2])
+    cont_total.reset_index(inplace=True, drop=True)
+    print(cont_total.tail())
+
+    cont_total.to_csv(route_base + title + '-total.csv')
+    print(f'connected {title} saved')
+    return
+
+# basic GA
 # # 50 노드 세대별 cost 통계
 # save_to = r'20191130\data processing\basic GA\un50describe.csv'
 # read_from = r'20191130\data processing\basic GA\un50pool.csv'
@@ -71,20 +88,18 @@ def unzip_pool(where_to_save: str, data_route: str, data_: pd.DataFrame = None):
 # read_from = r'20191130\data processing\basic GA\w500pool.csv'
 # unzip_pool(save_to, read_from)
 
-# # island GA un 100 pool unzip
-# data_route = r'20191130\data processing\island GA\un100pool.csv'
-# to_save = r'20191130\data processing\island GA\\'
-# title = 'un 100 continent'
-# process_pool(data_route=data_route, title=title, to_save=to_save)
+# island GA pools unzip
+names = ['un50', 'un100', 'w500', 'wc297']
+route_base = r'data processing/island GA/'
 
-save_to = r'20191130\data processing\island GA\un-100-describe-cont0.csv'
-read_from = r'20191130\data processing\island GA\un 100 continent-0.csv'
-unzip_pool(save_to, read_from)
+# for name in names:
+#     data_route = route_base + 'pool data/' + name + 'pool.csv'
+#     title = name + '-continent'
+#     process_pool(data_route=data_route, title=title, to_save=route_base + r'continents/')
+#     for i in [0, 1, 2]:
+#         save_to = route_base + 'describe-cont/' + name + f'-describe-cont{i}.csv'
+#         read_from = route_base + r'continents/' + name + f'-continent-{i}.csv'
+#         unzip_pool(save_to, read_from)
 
-save_to = r'20191130\data processing\island GA\un-100-describe-cont1.csv'
-read_from = r'20191130\data processing\island GA\un 100 continent-1.csv'
-unzip_pool(save_to, read_from)
-
-save_to = r'20191130\data processing\island GA\un-100-describe-cont2.csv'
-read_from = r'20191130\data processing\island GA\un 100 continent-2.csv'
-unzip_pool(save_to, read_from)
+for name in names:
+    connect_pool(route_base=route_base + 'describe-cont/', title=name)
