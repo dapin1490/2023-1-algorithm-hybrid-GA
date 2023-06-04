@@ -108,9 +108,6 @@ public:
 
 int main()
 {
-	// 빠른 입출력
-	ios::sync_with_stdio(false); cin.tie(NULL); cout.tie(NULL);
-
 	// 코드 실행 시간 측정 : https://scarlettb.tistory.com/5
 	clock_t clock_start = clock();
 	double clock_duration = 0;
