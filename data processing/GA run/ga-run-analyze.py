@@ -1,5 +1,6 @@
 import pandas as pd
 import matplotlib.pyplot as plt
+from math import ceil, floor
 
 # data = pd.read_csv(r'20191130\data processing\basic GA\un100describe.csv', header=0, index_col=0, encoding='utf-8')
 
@@ -20,6 +21,16 @@ import matplotlib.pyplot as plt
 
 #     plt.savefig(rf'20191130\data processing\basic GA\images\un100{col}.jpg', bbox_inches='tight')
 #     plt.clf()
+
+# data = pd.read_csv(r'data processing\island GA\describe-cont\wc297-describe-cont2.csv', header=0, index_col=0, encoding='utf-8')
+# plt.figure(figsize=(12, 8))  # 그래프 크기
+# plt.grid(alpha=0.3)  # 그리드 투명도
+# plt.plot(data.index, data['std'], alpha=0.8)
+# plt.title(f"un100 {'std'}")  # 그래프 제목에 괄호 치고 분산 표기
+# plt.ylim(floor(data['std'].min()), ceil(data['std'].max()))  # y 값 범위 제한
+# plt.xlabel('generation')
+# plt.ylabel('std', rotation='horizontal')
+# plt.savefig(rf'data processing\island GA\images\stat\wc297-cont2-std.jpg', bbox_inches='tight')
 
 columns = ['count', 'mean', 'std', 'min', '25%', '50%', '75%', 'max']
 
