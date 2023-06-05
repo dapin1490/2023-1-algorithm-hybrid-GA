@@ -26,10 +26,11 @@ from math import ceil, floor
 # plt.figure(figsize=(12, 8))  # 그래프 크기
 # plt.grid(alpha=0.3)  # 그리드 투명도
 # plt.plot(data.index, data['std'], alpha=0.8)
-# plt.title(f"un100 {'std'}")  # 그래프 제목에 괄호 치고 분산 표기
-# plt.ylim(floor(data['std'].min()), ceil(data['std'].max()))  # y 값 범위 제한
+# plt.title("wc297 continent2 std")
+# plt.ylim(floor(data['std'].min()) - 10, ceil(data['std'].max()) + 10)  # y 값 범위 제한
 # plt.xlabel('generation')
-# plt.ylabel('std', rotation='horizontal')
+# plt.ylabel('std')
+# plt.legend([f'max: {data["std"].max()}\nmin: {data["std"].min()}'], loc='upper left')
 # plt.savefig(rf'data processing\island GA\images\stat\wc297-cont2-std.jpg', bbox_inches='tight')
 
 columns = ['count', 'mean', 'std', 'min', '25%', '50%', '75%', 'max']
